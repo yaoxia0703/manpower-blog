@@ -4,10 +4,9 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResul
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
 import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
-import com.manpowergroup.springboot.springboot3web.content.article.ArticleService;
+import com.manpowergroup.springboot.springboot3web.content.article.service.ArticleService;
 import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
