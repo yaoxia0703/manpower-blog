@@ -1,0 +1,63 @@
+infra:
+  redis:
+    enabled: false   # ← 默认关闭（本地/测试）
+
+spring:
+  application:
+    name: manpower-blog
+  profiles:
+    active: dev
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+  # ！！！关键：这里必须是 spring.redis（不是 spring.data.redis）
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    # password: ${REDIS_PASSWORD:}
+
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      time: HH:mm:ss
+      date-time: yyyy-MM-dd HH:mm:ss
+
+  jackson:
+    time-zone: Asia/Tokyo
+
+  web:
+    locale: ja_JP
+    locale-resolver: fixed
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: "never"
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO

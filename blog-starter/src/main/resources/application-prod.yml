@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+infra:
+  redis:
+    enabled: true    # ← 打开开关
+    fail-fast: true
+
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DB:manpower_blog}?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Tokyo
+    username: ${MYSQL_USER:app}
+    password: ${MYSQL_PWD:change_me}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DB:0}
+      password: ${REDIS_PWD:}
+
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      time: HH:mm:ss
+      date-time: yyyy-MM-dd HH:mm:ss
+  web:
+    locale: ja_JP
+    locale-resolver: fixed
+  jackson:
+    time-zone: Asia/Tokyo
