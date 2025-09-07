@@ -10,7 +10,7 @@
     <property name="LOG_DIR" value="${LOG_PATH:-${USER_HOME}/logs}/${APP_NAME}"/>
     <!-- 输出格式：含 traceId / userId（来自 MDC） -->
     <property name="PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] traceId=%X{traceId} userId=%X{userId} %logger{36} - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] traceId=%X{traceId:-\-} userId=%X{userId:-\-} %logger{36} - %msg%n"/>
 
     <!-- 控制台 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

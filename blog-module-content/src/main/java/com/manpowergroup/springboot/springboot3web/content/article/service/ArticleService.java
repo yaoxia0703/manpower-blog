@@ -8,7 +8,7 @@ import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author YAOXIA
@@ -16,5 +16,7 @@ import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
  */
 public interface ArticleService extends IService<Article> {
 
-    JoinPageResult<ArticleVo>queryArticlePageVo(ArticleQueryRequest request);
+    JoinPageResult<ArticleVo> queryArticlePageVo(ArticleQueryRequest request);
+
+    ArticleVo getArticleVoById(Long id);
 }

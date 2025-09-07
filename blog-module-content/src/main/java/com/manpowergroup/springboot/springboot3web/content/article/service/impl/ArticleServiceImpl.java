@@ -1,6 +1,8 @@
 package com.manpowergroup.springboot.springboot3web.content.article.service.impl;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
+import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
 import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
 import com.manpowergroup.springboot.springboot3web.content.article.mapper.ArticleMapper;
@@ -11,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
 import static com.manpowergroup.springboot.springboot3web.blog.common.util.ServiceHelper.*;
 
 /**
@@ -40,6 +45,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         // 3. 返回结果
         return JoinPageResult.of(records, total, p, s);
+    }
+
+    @Override
+    public ArticleVo getArticleVoById(Long id) {
+        Optional.ofNullable(this.baseMapper.selectById(id))
+                .orElseThrow(() -> new BizException(
+                        ErrorCode.NOT_FOUND, "article.not_found"
+                ));
+
+        return null;
     }
 }
 

@@ -25,6 +25,8 @@ spring:
   web:
     locale: ja_JP
     locale-resolver: fixed
+    resources:
+      add-mappings: true
   jackson:
     time-zone: Asia/Tokyo
 
