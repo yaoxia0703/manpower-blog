@@ -61,3 +61,12 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
+
+
+
+# =========================================
+# アプリ共通スイッチ
+# =========================================
+app:
+  trace-id:
+    enabled: true   # true=表示, false=非表示
