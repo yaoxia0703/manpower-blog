@@ -58,9 +58,12 @@ management:
       show-details: "never"
 
 logging:
+  file:
+    path: logs   # 项目根目录下 logs/
   level:
     root: INFO
     org.springframework.web: INFO
+
 
 
 
