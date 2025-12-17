@@ -37,3 +37,8 @@ build/
 logs/
 *.log
 *.log.gz
+
+
+### Spring Boot local dev ###
+application-dev.yml
+
