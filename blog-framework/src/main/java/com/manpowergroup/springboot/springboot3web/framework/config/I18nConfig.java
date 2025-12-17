@@ -18,7 +18,7 @@ public class I18nConfig {
         ms.setBasename("classpath:messages");
         ms.setDefaultEncoding("UTF-8");
         ms.setFallbackToSystemLocale(false);
-        // 当 key 未命中时返回 key 本身，便于排查
+        // key が存在しない場合は key 自体を返す（調査用）
         ms.setUseCodeAsDefaultMessage(true);
         return ms;
     }
@@ -26,7 +26,7 @@ public class I18nConfig {
     @Bean
     public LocaleResolver localeResolver() {
         var lr = new AcceptHeaderLocaleResolver();
-        lr.setDefaultLocale(Locale.JAPAN); // 默认日语（可改为 Locale.SIMPLIFIED_CHINESE）
+        lr.setDefaultLocale(Locale.JAPAN); // デフォルトは日本語（必要に応じて Locale.SIMPLIFIED_CHINESE に変更可能）
         return lr;
     }
 }

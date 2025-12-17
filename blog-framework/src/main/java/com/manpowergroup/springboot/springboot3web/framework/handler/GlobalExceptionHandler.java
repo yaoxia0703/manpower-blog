@@ -4,166 +4,192 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.ValidationErrors;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.MDC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private final MessageSource messageSource;
+    private final Environment env;
 
-    public GlobalExceptionHandler(MessageSource messageSource) {
+    public GlobalExceptionHandler(MessageSource messageSource, Environment env) {
         this.messageSource = messageSource;
+        this.env = env;
     }
 
-    /**
-     * 用当前 Locale 翻译消息码；若找不到对应 key，则原文回退
-     */
+    /* ====================== 共通ユーティリティ ====================== */
+
+    /** 現在の環境が prod かどうかを判定 */
+    private boolean isProd() {
+        for (String p : env.getActiveProfiles()) {
+            if ("prod".equalsIgnoreCase(p)) return true;
+        }
+        return false;
+    }
+
+    /** prod 環境では detail を非表示（null にする） */
+    private String safeDetail(String detail) {
+        return isProd() ? null : detail;
+    }
+
+    /** 現在の Locale でメッセージコードを翻訳する */
     private String i18n(String codeOrRaw, Object... args) {
         if (codeOrRaw == null || codeOrRaw.isBlank()) return "";
         Locale locale = LocaleContextHolder.getLocale();
         try {
             return messageSource.getMessage(codeOrRaw, args, locale);
         } catch (NoSuchMessageException ignore) {
-            // 回退原文，兼容旧逻辑（你原来的 e.getMessage() 等）
             return codeOrRaw;
         }
     }
 
-    /* ====================== 业务异常 ====================== */
+    /** 共通ログ出力：traceId + message + detail */
+    private void logError(String message, String detail, Throwable e) {
+        String traceId = MDC.get("traceId");
+        if (e != null) {
+            log.error("[traceId={}] {} | {}", traceId, message, detail, e);
+        } else {
+            log.error("[traceId={}] {} | {}", traceId, message, detail);
+        }
+    }
+
+    /* ====================== 業務例外 ====================== */
     @ExceptionHandler(BizException.class)
     public Result<Object> handleBiz(BizException e) {
-        // 约定：e.getMessage() 是消息码 key（例如 "slug.duplicated" / "article.not_found"）
         String key = (e.getMessage() == null || e.getMessage().isBlank())
                 ? ErrorCode.BIZ_ERROR.message()
                 : e.getMessage();
-
         int code = (e.getCode() != null) ? e.getCode().code() : ErrorCode.BIZ_ERROR.code();
+        String msg = i18n(key);
+        String detail = i18n(key);
 
-        // 顶层 message 返回 key；data 暂不下沉 args（后续需要再加）
-        return Result.error(code, key);
+        logError(msg, detail, e);
+        return Result.error(code, msg).withDetail(safeDetail(detail));
     }
 
-
-
-    /* ====================== 校验异常 ====================== */
+    /* ====================== バリデーション例外 ====================== */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+    public Result<ValidationErrors> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         var items = e.getBindingResult().getFieldErrors().stream()
                 .map(fe -> ValidationErrors.ErrorItem.of(
                         fe.getField(),
-                        fe.getDefaultMessage(),   // 直接返回 key
-                        fe.getField()             // 占位符参数
+                        fe.getDefaultMessage(),
+                        fe.getField()
                 ))
                 .toList();
 
-        return Result.of(ErrorCode.VALIDATION_ERROR.code(),
-                ErrorCode.VALIDATION_ERROR.message(),
-                ValidationErrors.of(items));
+        String msg = i18n(ErrorCode.VALIDATION_ERROR.message());
+        String detail = "入力検証に失敗しました（" + items.size() + "件）";
+        logError(msg, detail, e);
+
+        return Result.of(ErrorCode.VALIDATION_ERROR.code(), msg, ValidationErrors.of(items))
+                .withDetail(safeDetail(detail));
     }
 
-
     @ExceptionHandler(ConstraintViolationException.class)
-    public Result<Object> handleConstraintViolation(ConstraintViolationException e) {
+    public Result<ValidationErrors> handleConstraintViolation(ConstraintViolationException e) {
         var items = e.getConstraintViolations().stream()
                 .map(v -> {
                     String path = v.getPropertyPath().toString();
                     String field = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
-                    return ValidationErrors.ErrorItem.of(
-                            field,
-                            v.getMessage(),   // 这里也应该是 key
-                            field             // 占位符参数
-                    );
+                    return ValidationErrors.ErrorItem.of(field, v.getMessage(), field);
                 })
                 .toList();
 
-        return Result.of(ErrorCode.VALIDATION_ERROR.code(),
-                ErrorCode.VALIDATION_ERROR.message(),
-                ValidationErrors.of(items));
+        String msg = i18n(ErrorCode.VALIDATION_ERROR.message());
+        String detail = "ConstraintViolation " + items.size() + "件";
+        logError(msg, detail, e);
+
+        return Result.of(ErrorCode.VALIDATION_ERROR.code(), msg, ValidationErrors.of(items))
+                .withDetail(safeDetail(detail));
     }
 
-
-    private String formatFieldError(FieldError fe) {
-        String field = fe.getField();
-        // 注解里的 message 通常可写“消息码”，这里按 i18n 翻译；没有就回退原文
-        String translated = i18n(Objects.toString(fe.getDefaultMessage(), "invalid"));
-        return field + ": " + translated;
-    }
-
-    private String formatConstraintViolation(ConstraintViolation<?> v) {
-        // v.getMessage() 同样当作消息码处理
-        String translated = i18n(Objects.toString(v.getMessage(), "invalid"));
-        return v.getPropertyPath() + ": " + translated;
-    }
-
-    /* ====================== 常见 Web 异常 ====================== */
+    /* ====================== よくある Web 例外 ====================== */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public Result<Object> handleMissingParam(MissingServletRequestParameterException e) {
-        var item = ValidationErrors.ErrorItem.of(
-                e.getParameterName(),
-                "error.missing_param",
-                e.getParameterName()
-        );
+    public Result<ValidationErrors> handleMissingParam(MissingServletRequestParameterException e) {
+        String msg = i18n("error.missing_param", e.getParameterName());
+        String detail = "Missing parameter: " + e.getParameterName();
+        logError(msg, detail, e);
 
-        return Result.of(ErrorCode.BAD_REQUEST.code(),
-                "error.missing_param",
-                ValidationErrors.of(java.util.List.of(item)));
+        var item = ValidationErrors.ErrorItem.of(e.getParameterName(), "error.missing_param", e.getParameterName());
+        return Result.of(ErrorCode.BAD_REQUEST.code(), msg, ValidationErrors.of(java.util.List.of(item)))
+                .withDetail(safeDetail(detail));
     }
-
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Result<Object> handleNotReadable(HttpMessageNotReadableException e) {
-        return Result.error(ErrorCode.BAD_REQUEST.code(), ErrorCode.BAD_REQUEST.message());
+        String msg = i18n(ErrorCode.BAD_REQUEST.message());
+        String detail = e.getMessage();
+        logError(msg, detail, e);
+        return Result.error(ErrorCode.BAD_REQUEST.code(), msg).withDetail(safeDetail(detail));
     }
-
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public Result<Object> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e) {
-        return Result.error(ErrorCode.METHOD_NOT_ALLOWED.code(), ErrorCode.METHOD_NOT_ALLOWED.message());
+        String msg = i18n(ErrorCode.METHOD_NOT_ALLOWED.message());
+        String detail = e.getMessage();
+        logError(msg, detail, e);
+        return Result.error(ErrorCode.METHOD_NOT_ALLOWED.code(), msg).withDetail(safeDetail(detail));
     }
-
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public Result<Object> handleMediaType(HttpMediaTypeNotSupportedException e) {
-        return Result.error(ErrorCode.UNSUPPORTED_MEDIA_TYPE.code(), ErrorCode.UNSUPPORTED_MEDIA_TYPE.message());
+        String msg = i18n(ErrorCode.UNSUPPORTED_MEDIA_TYPE.message());
+        String detail = e.getMessage();
+        logError(msg, detail, e);
+        return Result.error(ErrorCode.UNSUPPORTED_MEDIA_TYPE.code(), msg).withDetail(safeDetail(detail));
     }
-
 
     @ExceptionHandler(AccessDeniedException.class)
     public Result<Object> handleAccessDenied(AccessDeniedException e) {
-        return Result.error(ErrorCode.FORBIDDEN.code(), ErrorCode.FORBIDDEN.message());
+        String msg = i18n(ErrorCode.FORBIDDEN.message());
+        String detail = e.getMessage();
+        logError(msg, detail, e);
+        return Result.error(ErrorCode.FORBIDDEN.code(), msg).withDetail(safeDetail(detail));
     }
 
-
-    // 可选：开启 404 友好提示
     @ExceptionHandler(NoResourceFoundException.class)
     public Result<Object> handleNoResourceFound(NoResourceFoundException e) {
-        return Result.error(ErrorCode.NOT_FOUND.code(), ErrorCode.NOT_FOUND.message());
+        String msg = i18n(ErrorCode.NOT_FOUND.message());
+        String detail = e.getMessage();
+        logError(msg, detail, e);
+        return Result.error(ErrorCode.NOT_FOUND.code(), msg).withDetail(safeDetail(detail));
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public Result<Object> handleMaxUpload(MaxUploadSizeExceededException e) {
+        String msg = i18n("error.upload.too_large");
+        String detail = e.getMessage();
+        logError(msg, detail, e);
+        return Result.error(413, msg).withDetail(safeDetail(detail));
+    }
 
-    /* ====================== 兜底异常（500） ====================== */
+    /* ====================== その他例外（500） ====================== */
     @ExceptionHandler(Exception.class)
     public Result<Object> handleOther(Exception e) {
-        return Result.error(ErrorCode.SERVER_ERROR.code(), ErrorCode.SERVER_ERROR.message());
+        String msg = i18n(ErrorCode.SERVER_ERROR.message());
+        String detail = e.getMessage();
+        logError(msg, detail, e);
+        return Result.error(ErrorCode.SERVER_ERROR.code(), msg).withDetail(safeDetail(detail));
     }
-
 }
