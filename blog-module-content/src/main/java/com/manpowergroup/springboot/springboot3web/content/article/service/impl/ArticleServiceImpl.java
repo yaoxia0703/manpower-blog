@@ -5,6 +5,7 @@ import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleCreateReq;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleUpdateReq;
 import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
 import com.manpowergroup.springboot.springboot3web.content.article.mapper.ArticleMapper;
 import com.manpowergroup.springboot.springboot3web.content.article.service.ArticleService;
@@ -50,35 +51,56 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ArticleVo getArticleVoById(Long id) {
-        Optional.ofNullable(this.baseMapper.selectById(id))
-                .orElseThrow(() -> new BizException(
-                        ErrorCode.NOT_FOUND, "article.not_found"
-                ));
 
-        return null;
+        var article = Optional.ofNullable(id)
+                .map(this.baseMapper::selectById)
+                .orElseThrow(() -> new BizException(ErrorCode.NOT_FOUND));
+
+        ArticleVo vo = new ArticleVo();
+        BeanUtils.copyProperties(article, vo);
+        return vo;
     }
+
 
     @Override
     @Transactional
     public Long addArticle(ArticleCreateReq req) {
 
-        if (req == null) {
-            throw new BizException(ErrorCode.BAD_REQUEST, ErrorCode.BAD_REQUEST.message());
-        }
-
+        var safeReq = Optional.ofNullable(req).orElseThrow(() -> new BizException(ErrorCode.BAD_REQUEST));
         Article article = new Article();
-        BeanUtils.copyProperties(req, article);
-
+        BeanUtils.copyProperties(safeReq, article);
         boolean saved = this.save(article);
         if (!saved) {
             throw new BizException(
-                    ErrorCode.SERVER_ERROR,
-                    "article.create.failed"
+                    ErrorCode.SERVER_ERROR
             );
         }
-
         return article.getId();
+    }
+
+    @Override
+    public Boolean updateArticle(ArticleUpdateReq req) {
+        var safeReq = Optional.ofNullable(req).orElseThrow(() -> new BizException(ErrorCode.BAD_REQUEST));
+        Article article = new Article();
+        BeanUtils.copyProperties(safeReq, article);
+        boolean updated = this.updateById(article);
+        if (!updated) {
+            throw new BizException(
+                    ErrorCode.SERVER_ERROR);
+        }
+        return true;
+    }
+
+    @Override
+    public Boolean deleteArticle(Long id) {
+        Optional.ofNullable(id).orElseThrow(() -> new BizException(ErrorCode.BAD_REQUEST));
+        boolean deleted = this.removeById(id);
+        if (!deleted) {
+            throw new BizException(ErrorCode.SERVER_ERROR);
+        }
+        return true;
     }
 
 

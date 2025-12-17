@@ -4,6 +4,7 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResul
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleCreateReq;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleUpdateReq;
 import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
 import com.manpowergroup.springboot.springboot3web.content.article.service.ArticleService;
 import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
@@ -21,21 +22,15 @@ import java.time.LocalDateTime;
 public class ArticleCreateController {
     private final ArticleService articleService;
 
-    @PostMapping("/add")
+    @Operation(
+            summary = "記事を新規作成",
+            description = "記事情報を新規登録し、作成された記事IDを返却する"
+    )
+    @PostMapping("add")
     public Result<Long> add(
             @Valid @RequestBody ArticleCreateReq req
     ) {
-        Long id = articleService.addArticle(req);
-        return Result.ok(id);
-    }
-
-
-
-    @Data
-    public static class CreateReq {
-        private String title;
-        private String content;
-        private byte status; // 0-草稿 1-发布（默认1）
+        return Result.ok( articleService.addArticle(req));
     }
 
 
@@ -45,5 +40,31 @@ public class ArticleCreateController {
         JoinPageResult<ArticleVo> joinPageResult = articleService.queryArticlePageVo(request);
         return Result.ok(joinPageResult);
     }
+
+    @Operation(
+            summary = "記事を更新",
+            description = "指定された記事IDの情報を更新する"
+    )
+    @PutMapping("/update")
+    public Result<Boolean> update(
+            @Valid @RequestBody ArticleUpdateReq req
+    ) {
+        return Result.ok(articleService.updateArticle(req));
+    }
+
+    @Operation(
+            summary = "記事を論理削除",
+            description = "指定された記事IDを論理削除（is_deleted=1）する"
+    )
+    @DeleteMapping("/{id}")
+    public Result<Boolean> delete(@PathVariable Long id) {
+        return Result.ok(articleService.deleteArticle(id));
+    }
+
+
+
+
+
+
 
 }

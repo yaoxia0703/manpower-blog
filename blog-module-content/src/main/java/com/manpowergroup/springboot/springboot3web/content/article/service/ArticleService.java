@@ -3,6 +3,7 @@ package com.manpowergroup.springboot.springboot3web.content.article.service;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleCreateReq;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleUpdateReq;
 import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
@@ -21,6 +22,9 @@ public interface ArticleService extends IService<Article> {
 
     ArticleVo getArticleVoById(Long id);
 
-    Long  addArticle(ArticleCreateReq req);
-   ;
+    Long addArticle(ArticleCreateReq req);
+
+    Boolean updateArticle(ArticleUpdateReq req);
+
+    Boolean deleteArticle(Long id);
 }
