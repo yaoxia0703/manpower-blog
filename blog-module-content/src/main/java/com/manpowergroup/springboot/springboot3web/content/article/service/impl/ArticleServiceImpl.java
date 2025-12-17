@@ -3,6 +3,7 @@ package com.manpowergroup.springboot.springboot3web.content.article.service.impl
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
+import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleCreateReq;
 import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
 import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
 import com.manpowergroup.springboot.springboot3web.content.article.mapper.ArticleMapper;
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,5 +58,29 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         return null;
     }
+
+    @Override
+    @Transactional
+    public Long addArticle(ArticleCreateReq req) {
+
+        if (req == null) {
+            throw new BizException(ErrorCode.BAD_REQUEST, ErrorCode.BAD_REQUEST.message());
+        }
+
+        Article article = new Article();
+        BeanUtils.copyProperties(req, article);
+
+        boolean saved = this.save(article);
+        if (!saved) {
+            throw new BizException(
+                    ErrorCode.SERVER_ERROR,
+                    "article.create.failed"
+            );
+        }
+
+        return article.getId();
+    }
+
+
 }
 
