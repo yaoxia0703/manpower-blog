@@ -14,10 +14,10 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
   # ！！！关键：这里必须是 spring.redis（不是 spring.data.redis）
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    database: 0
+#  redis:
+#    host: 127.0.0.1
+#    port: 6379
+#    database: 0
     # password: ${REDIS_PASSWORD:}
 
   mvc:
