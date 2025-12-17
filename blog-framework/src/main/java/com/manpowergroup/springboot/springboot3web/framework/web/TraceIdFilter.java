@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE) // 最先执行，保证后续日志都有 traceId
+@Order(Ordered.HIGHEST_PRECEDENCE) // 最優先で実行し、後続ログがすべて traceId を持つようにする
 public class TraceIdFilter extends OncePerRequestFilter {
 
     public static final String TRACE_ID = "traceId";
     public static final String TRACE_HEADER = "X-Trace-Id";
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(TraceIdFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -26,21 +28,21 @@ public class TraceIdFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1) 优先使用上游传来的 X-Trace-Id；没有就生成一个
+        // 1) 上流から渡された X-Trace-Id を優先使用。存在しなければ生成する
         String traceId = request.getHeader(TRACE_HEADER);
         if (traceId == null || traceId.isBlank()) {
-            // 去掉连字符的 UUID，更短好看
+            // ハイフンを除いた UUID。短く見やすい
             traceId = UUID.randomUUID().toString().replace("-", "");
         }
 
-        // 2) 放到 MDC，供日志 Pattern 使用
+        // 2) MDC に設定し、ログのパターンで利用できるようにする
         MDC.put(TRACE_ID, traceId);
         try {
-            // 3) 回写到响应头，便于前端/网关拿到
+            // 3) レスポンスヘッダーに書き戻し、フロントエンド/ゲートウェイが取得できるようにする
             response.setHeader(TRACE_HEADER, traceId);
             filterChain.doFilter(request, response);
         } finally {
-            // 4) 清理，避免线程复用造成串日志
+            // 4) スレッドの再利用によるログ混在を避けるためクリア
             MDC.remove(TRACE_ID);
         }
     }
