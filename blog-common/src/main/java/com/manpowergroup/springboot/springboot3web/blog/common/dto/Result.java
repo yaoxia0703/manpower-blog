@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * 统一返回结构（兼容旧用法，新增 traceId/timestamp）
+ * 統一レスポンス構造（旧仕様との互換、新規追加：traceId / timestamp）
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,15 +23,25 @@ public class Result<T> {
     @JsonProperty("data")
     private T data;
 
-    /** 新增：便于前端/日志排错关联 */
+    /** 新規追加：フロントエンド／ログのトラブルシュート用に関連付け */
     @JsonProperty("traceId")
     private String traceId;
 
-    /** 新增：服务端生成时间（毫秒 epoch） */
+    /** 新規追加：サーバ側で生成された時刻（エポックミリ秒） */
     @JsonProperty("timestamp")
     private Long timestamp;
 
-    /* -------------------- 基础工厂：保持原有语义 -------------------- */
+    @JsonProperty("detail")
+    private String detail; // 追加：詳細メッセージ（i18n key の翻訳や例外の具体理由を格納）
+
+    /* -------------------- 基本ファクトリーメソッド：従来の意味を維持 -------------------- */
+
+    public Result<T> withDetail(String detail) {
+        this.detail = detail;
+        if (this.timestamp == null) this.timestamp = now();
+        return this;
+    }
+
 
     public static <T> Result<T> ok(T data, String msg) {
         Result<T> r = new Result<>();
@@ -42,8 +52,10 @@ public class Result<T> {
         return r;
     }
 
+
+
     public static <T> Result<T> ok(T data) {
-        return ok(data, "success.ok"); // 建议使用 i18n key；异常处理器也会做翻译
+        return ok(data, "success.ok"); // i18nキーを推奨；例外ハンドラ側で翻訳される
     }
 
     public static <T> Result<T> okMsg(String msg) {
@@ -58,6 +70,11 @@ public class Result<T> {
         return error(500, msg);
     }
 
+    public static <T> Result<T> errorWithDetail(int code, String msg, String detail) {
+        return Result.<T>error(code, msg).withDetail(detail);
+    }
+
+
     public static <T> Result<T> error(int code, String msg) {
         Result<T> r = new Result<>();
         r.setCode(code);
@@ -66,16 +83,17 @@ public class Result<T> {
         return r;
     }
 
-    /** 兼容你以前可能有的写法：fail(...) */
+    /** 以前の呼び方との互換：fail(...) */
     public static <T> Result<T> fail(int code, String msg) {
         return error(code, msg);
     }
 
-    /* -------------------- 与 ErrorCode 枚举的友好重载（可选） -------------------- */
+    /* -------------------- ErrorCode 列挙との連携用オーバーロード（任意） -------------------- */
 
     /**
-     * 建议你的 ErrorCode 设计为：int code(); String key();
-     * 其中 key 是 i18n 消息码（如 "error.validation"）
+     * 推奨する ErrorCode の設計：
+     * int code(); String key();
+     * key は i18n メッセージコード（例: "error.validation"）
      */
     public static <T> Result<T> error(EnumLikeErrorCode ec) {
         return error(ec.code(), ec.key());
@@ -86,7 +104,7 @@ public class Result<T> {
     }
 
     public static <T> Result<T> ok(EnumLikeErrorCode ec, T data) {
-        // 场景：某些“成功但需要文案”的响应
+        // シナリオ：成功だが文言提示が必要なケース
         Result<T> r = new Result<>();
         r.setCode(ec.code());
         r.setMessage(ec.key());
@@ -95,16 +113,16 @@ public class Result<T> {
         return r;
     }
 
-    /* -------------------- traceId 辅助（供异常处理器/拦截器设置） -------------------- */
+    /* -------------------- traceId 補助（例外ハンドラ／インターセプタで設定） -------------------- */
 
     public Result<T> withTraceId(String traceId) {
         this.traceId = traceId;
-        // 若外部未设置时间，这里补上
+        // 外部で timestamp 未設定の場合はここで補完
         if (this.timestamp == null) this.timestamp = now();
         return this;
     }
 
-    /* -------------------- 通用工厂 -------------------- */
+    /* -------------------- 汎用ファクトリーメソッド -------------------- */
 
     public static <T> Result<T> of(int code, String msg, T data) {
         Result<T> r = new Result<>();
@@ -119,16 +137,17 @@ public class Result<T> {
         return Instant.now().toEpochMilli();
     }
 
-    /* -------------------- 兼容接口：可选的 ErrorCode 适配 -------------------- */
+    /* -------------------- 互換用インタフェース：ErrorCode 適用 -------------------- */
 
     /**
-     * 为了不强依赖你的 ErrorCode 枚举定义，这里用一个最小接口做适配。
-     * 你的枚举可实现此接口，或你也可以删除这段并把上面的重载改成你的枚举类型。
+     * ErrorCode 列挙に強依存しないために最小インタフェースを定義。
+     * 独自の列挙型でこのインタフェースを実装してもよいし、
+     * 不要なら削除して上記のオーバーロードを直接自作の列挙に変更してもよい。
      */
     public interface EnumLikeErrorCode {
         int code();
 
-        /** 返回 i18n 消息码（如 "error.validation"） */
+        /** i18n メッセージコード（例: "error.validation"）を返す */
         String key();
 
         default String messageOrKey() {

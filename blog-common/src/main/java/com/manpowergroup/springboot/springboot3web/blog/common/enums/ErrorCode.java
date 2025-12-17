@@ -1,6 +1,8 @@
 package com.manpowergroup.springboot.springboot3web.blog.common.enums;
 
-/** 统一错误码（可逐步扩展业务码 1000+） */
+/**
+ * 統一エラーコード（業務コードは 1000+ から拡張可能）
+ */
 public enum ErrorCode {
     SUCCESS(200, "success.ok"),
     BAD_REQUEST(400, "error.bad_request"),
@@ -11,13 +13,41 @@ public enum ErrorCode {
     UNSUPPORTED_MEDIA_TYPE(415, "error.unsupported_media_type"),
     TOO_MANY_REQUESTS(429, "error.too_many_requests"),
     VALIDATION_ERROR(422, "error.validation"),
-    /** 推荐用 409（Conflict）表示业务冲突，也可保留 460 */
+
+    // ===== 併走/排他制御（競合）=====
+    // 同時実行などにより処理が衝突した場合（例：ロック取得失敗）
+    CONFLICT(409, "error.conflict"),
+
     BIZ_ERROR(409, "error.business"),
     SERVER_ERROR(500, "error.server"),
-    SERVICE_UNAVAILABLE(503, "error.unavailable");
+    SERVICE_UNAVAILABLE(503, "error.unavailable"),
+
+    // ========================
+    // ファイル関連エラー
+    // ========================
+    FILE_NOT_FOUND(404, "error.file.not_found"),
+    FILE_UNREADABLE(403, "error.file.unreadable"),
+    FILE_EMPTY(422, "error.file.empty"),
+    FILE_UNSUPPORTED(415, "error.file.unsupported"),
+    FILE_IO_ERROR(500, "error.file.io"),
+
+    // ========================
+    // Excel / データ構造関連
+    // ========================
+    SHEET_MISSING(422, "error.sheet.missing"),
+    HEADER_MISSING(422, "error.header.missing"),
+    HEADER_INVALID(422, "error.header.invalid"),
+    DATA_FORMAT_ERROR(422, "error.data.format"),
+    DATA_VALIDATION_FAILED(422, "error.data.validation"),
+
+    // ========================
+    // インポート処理関連
+    // ========================
+    IMPORT_FAILED(500, "error.import.failed"),
+    IMPORT_ABORTED(500, "error.import.aborted"),
+    IMPORT_PARTIAL_SUCCESS(206, "success.import.partial");
 
     private final int code;
-    /** 这里不再是默认文案，而是 i18n 的 messageKey */
     private final String messageKey;
 
     ErrorCode(int code, String messageKey) {
@@ -29,7 +59,6 @@ public enum ErrorCode {
         return code;
     }
 
-    /** 兼容旧调用：暂时让 message() 返回 key，后续由 Handler 做解析 */
     public String message() {
         return messageKey;
     }
