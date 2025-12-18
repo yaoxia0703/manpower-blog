@@ -13,12 +13,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.UUID;
 
+/**
+ * リクエスト単位で traceId を付与するフィルタ
+ */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE) // 最優先で実行し、後続ログがすべて traceId を持つようにする
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class TraceIdFilter extends OncePerRequestFilter {
 
     public static final String TRACE_ID = "traceId";
     public static final String TRACE_HEADER = "X-Trace-Id";
+
     private static final org.slf4j.Logger log =
             org.slf4j.LoggerFactory.getLogger(TraceIdFilter.class);
 
@@ -28,21 +32,20 @@ public class TraceIdFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1) 上流から渡された X-Trace-Id を優先使用。存在しなければ生成する
+        // リクエストヘッダーから traceId を取得（存在しない場合は生成）
         String traceId = request.getHeader(TRACE_HEADER);
         if (traceId == null || traceId.isBlank()) {
-            // ハイフンを除いた UUID。短く見やすい
             traceId = UUID.randomUUID().toString().replace("-", "");
         }
 
-        // 2) MDC に設定し、ログのパターンで利用できるようにする
+        // MDC に traceId を設定
         MDC.put(TRACE_ID, traceId);
         try {
-            // 3) レスポンスヘッダーに書き戻し、フロントエンド/ゲートウェイが取得できるようにする
+            // レスポンスヘッダーへ traceId を設定
             response.setHeader(TRACE_HEADER, traceId);
             filterChain.doFilter(request, response);
         } finally {
-            // 4) スレッドの再利用によるログ混在を避けるためクリア
+            // MDC から traceId を削除
             MDC.remove(TRACE_ID);
         }
     }

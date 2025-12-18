@@ -9,24 +9,35 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import java.util.Locale;
 
+/**
+ * 国際化（i18n）設定クラス
+ */
 @Configuration
 public class I18nConfig {
 
+    /**
+     * メッセージリソースの設定
+     */
     @Bean
     public MessageSource messageSource() {
         var ms = new ReloadableResourceBundleMessageSource();
         ms.setBasename("classpath:messages");
         ms.setDefaultEncoding("UTF-8");
         ms.setFallbackToSystemLocale(false);
-        // key が存在しない場合は key 自体を返す（調査用）
+        // 該当するキーが存在しない場合は、キー文字列をそのまま返す
         ms.setUseCodeAsDefaultMessage(true);
         return ms;
     }
 
+    /**
+     * ロケール解決の設定
+     * Accept-Language ヘッダーをもとにロケールを判定する
+     */
     @Bean
     public LocaleResolver localeResolver() {
         var lr = new AcceptHeaderLocaleResolver();
-        lr.setDefaultLocale(Locale.JAPAN); // デフォルトは日本語（必要に応じて Locale.SIMPLIFIED_CHINESE に変更可能）
+        // デフォルトロケールは日本語
+        lr.setDefaultLocale(Locale.JAPAN);
         return lr;
     }
 }

@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 @Data
 @TableName("t_sys_user")
 public class User {
-    @TableId(type = IdType.AUTO) // 如果不是自增，改成 ASSIGN_ID
+
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private String username;
@@ -17,9 +18,13 @@ public class User {
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
+
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
-    @TableLogic // 配合你框架层的逻辑删除配置：0未删 1已删
+    /**
+     * 論理削除フラグ（0=未削除、1=削除済み）
+     */
+    @TableLogic
     private Integer isDeleted;
 }

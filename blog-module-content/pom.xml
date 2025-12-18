@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -15,47 +16,54 @@
     <name>blog-module-content</name>
 
     <dependencies>
-        <!-- 业务依赖 -->
+
+        <!-- 業務モジュール依存関係 -->
         <dependency>
             <groupId>com.manpowergroup.springboot.springboot3web</groupId>
             <artifactId>blog-framework</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.manpowergroup.springboot.springboot3web</groupId>
             <artifactId>blog-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- 测试依赖（不写版本，父 POM 已管理） -->
+        <!-- テスト依存関係（バージョンは親 POM にて管理） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!-- Testcontainers -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>1.20.2</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>mysql</artifactId>
             <version>1.20.2</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.4.0</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 </project>

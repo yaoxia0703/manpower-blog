@@ -1,10 +1,11 @@
 infra:
   redis:
-    enabled: false   # ← 默认关闭（本地/测试）
+    enabled: false   # デフォルトは無効（ローカル／テスト環境）
 
 spring:
   application:
     name: manpower-blog
+
   profiles:
     active: dev
 
@@ -13,12 +14,12 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
-  # ！！！关键：这里必须是 spring.redis（不是 spring.data.redis）
-#  redis:
-#    host: 127.0.0.1
-#    port: 6379
-#    database: 0
-    # password: ${REDIS_PASSWORD:}
+  # Redis 設定（spring.redis）
+  # redis:
+  #   host: 127.0.0.1
+  #   port: 6379
+  #   database: 0
+  #   password: ${REDIS_PASSWORD:}
 
   mvc:
     format:
@@ -40,10 +41,12 @@ spring:
 
 server:
   port: 8080
+
   tomcat:
     threads:
       max: 200
       min-spare: 20
+
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
@@ -53,23 +56,22 @@ management:
     web:
       exposure:
         include: health,info
+
   endpoint:
     health:
       show-details: "never"
 
 logging:
   file:
-    path: logs   # 项目根目录下 logs/
+    path: logs   # プロジェクトルート配下のログ出力先
+
   level:
     root: INFO
     org.springframework.web: INFO
 
-
-
-
 # =========================================
-# アプリ共通スイッチ
+# アプリケーション共通設定
 # =========================================
 app:
   trace-id:
-    enabled: true   # true=表示, false=非表示
+    enabled: true   # true=有効 / false=無効

@@ -6,17 +6,27 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * セキュリティ設定クラス
+ */
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * SecurityFilterChain 設定
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // 关掉 csrf
+                // CSRF 対策を無効化
+                .csrf(csrf -> csrf.disable())
+                // すべてのリクエストを許可
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 全部接口都放行
+                        .anyRequest().permitAll()
                 )
-                .httpBasic(Customizer.withDefaults()); // 保留 Basic Auth，但全放行了
+                // Basic 認証を有効化（ただし全リクエスト許可）
+                .httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
 }

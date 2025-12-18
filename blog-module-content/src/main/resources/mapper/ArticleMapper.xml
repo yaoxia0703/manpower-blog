@@ -1,39 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.manpowergroup.springboot.springboot3web.content.article.mapper.ArticleMapper">
 
-    <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.manpowergroup.springboot.springboot3web.content.article.entity.Article">
-        <id column="id" property="id" />
-        <result column="title" property="title" />
-        <result column="content" property="content" />
-        <result column="status" property="status" />
-        <result column="created_at" property="createdAt" />
-        <result column="updated_at" property="updatedAt" />
-        <result column="is_deleted" property="isDeleted" />
+    <!-- 基本結果マッピング -->
+    <resultMap id="BaseResultMap"
+               type="com.manpowergroup.springboot.springboot3web.content.article.entity.Article">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
+    <!-- 基本カラム一覧 -->
     <sql id="Base_Column_List">
         id, title, content, status, created_at, updated_at, is_deleted
     </sql>
+
+    <!-- 記事一覧取得（ページング） -->
     <select id="selectPageVo"
             resultType="com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo">
 
-        SELECT a.id,
+        SELECT
+        a.id,
         a.title,
         a.summary,
         a.content,
         c.nick_name AS authorName,
         b.name AS categoryName,
-        a.created_at AS createAt,
+        a.created_at AS createdAt,
         a.updated_at AS updatedAt
         FROM t_content_article a
         LEFT JOIN t_content_category b ON a.category_id = b.id
         LEFT JOIN t_sys_user c ON a.author_id = c.id
         <where>
-            a.is_deleted=0
-            <if test="req.title!=null and req.title!=''">
+            a.is_deleted = 0
+            <if test="req.title != null and req.title != ''">
                 AND a.title LIKE CONCAT('%', #{req.title}, '%')
             </if>
             <if test="req.status != null">
@@ -43,16 +49,19 @@
                 AND a.category_id = #{req.categoryId}
             </if>
         </where>
-        order by a.created_at desc  limit #{offset},#{size}
+        ORDER BY a.created_at DESC
+        LIMIT #{offset}, #{size}
     </select>
+
+    <!-- 条件一致件数取得 -->
     <select id="countJoin" resultType="java.lang.Long">
-        SELECT count(a.id)
+        SELECT COUNT(a.id)
         FROM t_content_article a
         LEFT JOIN t_content_category b ON a.category_id = b.id
         LEFT JOIN t_sys_user c ON a.author_id = c.id
         <where>
-            a.is_deleted=0
-            <if test="req.title!=null and req.title!=''">
+            a.is_deleted = 0
+            <if test="req.title != null and req.title != ''">
                 AND a.title LIKE CONCAT('%', #{req.title}, '%')
             </if>
             <if test="req.status != null">
@@ -63,6 +72,5 @@
             </if>
         </where>
     </select>
-
 
 </mapper>

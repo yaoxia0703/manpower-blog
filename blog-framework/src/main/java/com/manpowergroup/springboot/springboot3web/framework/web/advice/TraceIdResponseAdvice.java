@@ -12,20 +12,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 /**
- * 全てのControllerレスポンスにtraceIdを付与するアドバイス。
- * - Result<T> 型のみtraceIdを追加
- * - 設定でON/OFFを切り替え可能
+ * Controller のレスポンスに traceId を付与するアドバイス
  */
 @RestControllerAdvice
 public class TraceIdResponseAdvice implements ResponseBodyAdvice<Object> {
 
-    // application.yml で設定: app.trace-id.enabled=false なら無効化
+    /**
+     * traceId 付与の有効／無効設定
+     */
     @Value("${app.trace-id.enabled:true}")
     private boolean traceIdEnabled;
 
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
-        // 全てのレスポンスを対象にする
+        // すべてのレスポンスを対象とする
         return true;
     }
 
@@ -38,7 +38,6 @@ public class TraceIdResponseAdvice implements ResponseBodyAdvice<Object> {
                                   ServerHttpResponse response) {
 
         if (!traceIdEnabled) {
-            // 設定で無効なら何もせず返す
             return body;
         }
 
@@ -49,6 +48,7 @@ public class TraceIdResponseAdvice implements ResponseBodyAdvice<Object> {
             }
             return result;
         }
+
         return body;
     }
 }

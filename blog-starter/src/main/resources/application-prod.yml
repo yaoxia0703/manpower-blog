@@ -4,8 +4,8 @@ server:
 
 infra:
   redis:
-    enabled: true    # ← 打开开关
-    fail-fast: true
+    enabled: true    # Redis 機能を有効化
+    fail-fast: true  # 起動時に Redis 接続失敗で即時エラーとする
 
 spring:
   datasource:
@@ -26,8 +26,10 @@ spring:
       date: yyyy-MM-dd
       time: HH:mm:ss
       date-time: yyyy-MM-dd HH:mm:ss
+
   web:
     locale: ja_JP
     locale-resolver: fixed
+
   jackson:
     time-zone: Asia/Tokyo

@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "ArticleVo", description = "記事表示用VO")
+@Schema(name = "ArticleVo", description = "記事表示用 VO")
 public class ArticleVo {
 
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "主キー")
+    @Schema(description = "記事ID")
     private Long id;
 
     @Schema(description = "記事タイトル")
@@ -25,7 +25,7 @@ public class ArticleVo {
     @Schema(description = "記事概要")
     private String summary;
 
-    @Schema(description = "記事内容")
+    @Schema(description = "記事本文")
     private String content;
 
     @Schema(description = "作成者名")
@@ -41,6 +41,4 @@ public class ArticleVo {
     @Schema(description = "更新日時")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Tokyo")
     private LocalDateTime updatedAt;
-
 }
-

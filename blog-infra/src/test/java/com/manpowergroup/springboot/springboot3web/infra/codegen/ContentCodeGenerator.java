@@ -13,61 +13,71 @@ import java.util.*;
 
 public class ContentCodeGenerator {
 
+    /**
+     * 環境変数取得（未設定時はデフォルト値を使用）
+     */
     private static String envOr(String k, String d) {
         String v = System.getenv(k);
         return (v == null || v.isBlank()) ? d : v;
     }
 
     public static void main(String[] args) throws Exception {
-        // 1) DB 连接
-        String url  = envOr("DB_URL",  "jdbc:mysql://localhost:3306/blog_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Tokyo");
+
+        // DB 接続情報
+        String url  = envOr(
+                "DB_URL",
+                "jdbc:mysql://localhost:3306/blog_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Tokyo"
+        );
         String user = envOr("DB_USER", "root");
         String pwd  = envOr("DB_PWD",  "Yx19900703.");
 
-        // 2) 以 blog-infra 为工作目录，输出到 blog-module-content
-        Path infraRoot = Paths.get(System.getProperty("user.dir"));             // .../manpower-blog/blog-infra
-        Path target    = infraRoot.getParent().resolve("blog-module-content");  // .../manpower-blog/blog-module-content
+        // 出力先設定（blog-infra を基点に blog-module-content へ出力）
+        Path infraRoot = Paths.get(System.getProperty("user.dir"));
+        Path target    = infraRoot.getParent().resolve("blog-module-content");
         String javaOut = target.resolve("src/main/java").toString();
         String xmlOut  = target.resolve("src/main/resources/mapper").toString();
 
-        // 兜底创建输出目录
+        // 出力ディレクトリ作成
         Files.createDirectories(Paths.get(javaOut));
         Files.createDirectories(Paths.get(xmlOut));
 
-        // 3) 包前缀与表
+        // パッケージプレフィックスおよび対象テーブル
         String basePkg = "com.manpowergroup.springboot.springboot3web.content";
         List<String> tables = (args != null && args.length > 0)
                 ? Arrays.asList(args)
                 : List.of("t_content_article");
 
-        // 4) 自定义各文件输出路径 —— 把 Controller 映射到黑洞目录（即使模板没禁用也不会污染工程）
+        // 各ファイルの出力先設定
         Map<OutputFile, String> paths = new HashMap<>();
         paths.put(OutputFile.xml, xmlOut);
-        paths.put(OutputFile.controller, infraRoot.resolve("target/generated-ignore").toString());
+        paths.put(OutputFile.controller,
+                infraRoot.resolve("target/generated-ignore").toString());
 
         FastAutoGenerator.create(url, user, pwd)
                 .globalConfig(b -> b
                         .author("YAOXIA")
-                        .outputDir(javaOut)                 // Java 文件输出到 content 模块
+                        .outputDir(javaOut)
                         .dateType(DateType.TIME_PACK)
                         .disableOpenDir()
                 )
                 .packageConfig(b -> b
                         .parent(basePkg)
-                        .pathInfo(paths)                    // 覆盖 XML 与 Controller 的输出路径
+                        .pathInfo(paths)
                 )
                 .strategyConfig(b -> b
                         .addInclude(tables)
                         .addTablePrefix("t_content_")
                         .entityBuilder().enableLombok()
-                        .mapperBuilder().enableBaseResultMap().enableBaseColumnList()
+                        .mapperBuilder()
+                        .enableBaseResultMap()
+                        .enableBaseColumnList()
                         .serviceBuilder()
                         .formatServiceFileName("%sService")
                         .formatServiceImplFileName("%sServiceImpl")
                 )
-                // 双保险：禁用 Controller 模板
+                // Controller テンプレートを無効化
                 .templateConfig(t -> t.disable(TemplateType.CONTROLLER))
-                // 使用 Freemarker
+                // Freemarker テンプレートエンジンを使用
                 .templateEngine(new FreemarkerTemplateEngine())
                 .execute();
     }

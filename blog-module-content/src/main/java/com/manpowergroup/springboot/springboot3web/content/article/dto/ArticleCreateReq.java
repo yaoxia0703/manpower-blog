@@ -7,31 +7,31 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-@Schema(name = "ArticleCreateReq", description = "文章新增请求 DTO")
+@Schema(name = "ArticleCreateReq", description = "記事作成リクエスト DTO")
 public class ArticleCreateReq {
 
     @NotBlank
     @Size(max = 200)
-    @Schema(description = "文章标题（最长200字符）", example = "我的第一篇博客")
+    @Schema(description = "記事タイトル（最大200文字）", example = "初めてのブログ記事")
     private String title;
 
     @Size(max = 512)
-    @Schema(description = "文章摘要（最长512字符，可为空）", example = "这是文章摘要")
+    @Schema(description = "記事概要（最大512文字、任意）", example = "この記事の概要です")
     private String summary;
 
     @NotBlank
-    @Schema(description = "文章正文内容", example = "正文内容……")
+    @Schema(description = "記事本文", example = "本文内容…")
     private String content;
 
     @NotNull
-    @Schema(description = "分类ID（t_content_category.id）", example = "1")
+    @Schema(description = "カテゴリID（t_content_category.id）", example = "1")
     private Long categoryId;
 
     @NotNull
-    @Schema(description = "作者ID（t_sys_user.id）", example = "1001")
+    @Schema(description = "作成者ID（t_sys_user.id）", example = "1001")
     private Long authorId;
 
     @NotNull
-    @Schema(description = "文章状态（0=草稿，1=已发布，2=下线）", example = "1")
+    @Schema(description = "記事ステータス（0=下書き、1=公開、2=非公開）", example = "1")
     private Byte status;
 }

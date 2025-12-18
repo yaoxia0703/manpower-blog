@@ -12,14 +12,18 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * Redis 設定クラス
+ * infra.redis.enabled=true の場合のみ有効化される
+ */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(RedisProperties.class)
-/**
- * 只有 infra.redis.enabled=true 才启用 Redis
- */
 @ConditionalOnProperty(prefix = "infra.redis", name = "enabled", havingValue = "true")
 public class RedisConfig {
 
+    /**
+     * Redis 接続ファクトリの設定（スタンドアロン構成）
+     */
     @Bean
     public LettuceConnectionFactory redisConnectionFactory(RedisProperties props) {
         RedisStandaloneConfiguration cfg =
@@ -31,6 +35,10 @@ public class RedisConfig {
         return new LettuceConnectionFactory(cfg);
     }
 
+    /**
+     * Object 用 RedisTemplate 設定
+     * キーは String、値は JSON 形式でシリアライズする
+     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory cf) {
         RedisTemplate<String, Object> t = new RedisTemplate<>();
@@ -44,6 +52,9 @@ public class RedisConfig {
         return t;
     }
 
+    /**
+     * String 専用 RedisTemplate 設定
+     */
     @Bean
     public StringRedisTemplate stringRedisTemplate(LettuceConnectionFactory cf) {
         return new StringRedisTemplate(cf);

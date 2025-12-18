@@ -15,27 +15,34 @@ public class RedisHealthCheck {
 
     private final ObjectProvider<StringRedisTemplate> provider;
 
-    // 这个 Bean 总是注册，用属性判断是否执行
+    /**
+     * Redis 起動時のヘルスチェック
+     * Bean 自体は常に登録し、プロパティにより実行可否を制御する
+     */
     @Bean
     ApplicationRunner redisPingOnStartup(
             @org.springframework.beans.factory.annotation.Value("${infra.redis.enabled:false}") boolean enabled) {
+
         return args -> {
             if (!enabled) {
-                log.info("Redis 已禁用，跳过启动自检。");
+                log.info("Redis は無効化されています。起動時ヘルスチェックをスキップします。");
                 return;
             }
+
             var srt = provider.getIfAvailable();
             if (srt == null) {
-                log.warn("Redis 已启用但未装配，跳过启动自检。");
+                log.warn("Redis は有効ですが、StringRedisTemplate が未設定のためヘルスチェックをスキップします。");
                 return;
             }
+
             try {
-                var pong = srt.getRequiredConnectionFactory().getConnection().ping();
-                log.info("Redis 自检成功: {}", pong);
+                var pong = srt.getRequiredConnectionFactory()
+                        .getConnection()
+                        .ping();
+                log.info("Redis 起動時ヘルスチェック成功: {}", pong);
             } catch (Exception e) {
-                log.error("Redis 自检失败: {}", e.getMessage(), e);
+                log.error("Redis 起動時ヘルスチェック失敗: {}", e.getMessage(), e);
             }
         };
     }
 }
-
