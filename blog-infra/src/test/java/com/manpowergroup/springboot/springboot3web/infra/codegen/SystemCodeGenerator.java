@@ -16,68 +16,92 @@ public class SystemCodeGenerator {
     /**
      * 環境変数取得（未設定時はデフォルト値を使用）
      */
-    private static String envOr(String k, String d) {
-        String v = System.getenv(k);
-        return (v == null || v.isBlank()) ? d : v;
+    private static String envOr(String key, String def) {
+        String val = System.getenv(key);
+        return (val == null || val.isBlank()) ? def : val;
     }
 
     public static void main(String[] args) throws Exception {
 
-        // DB 接続情報
-        String url  = envOr(
+        /* ========= DB 接続情報 ========= */
+        String url = envOr(
                 "DB_URL",
-                "jdbc:mysql://localhost:3306/blog_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Tokyo"
+                "jdbc:mysql://localhost:3306/blog_db" +
+                        "?useUnicode=true&characterEncoding=utf8" +
+                        "&serverTimezone=Asia/Tokyo"
         );
         String user = envOr("DB_USER", "root");
-        String pwd  = envOr("DB_PWD",  "Yx19900703.");
+        String pwd  = envOr("DB_PWD", "Yx19900703.");
 
-        // 出力先設定（blog-module-system）
-        Path infraRoot = Paths.get(System.getProperty("user.dir"));
-        Path target    = infraRoot.getParent().resolve("blog-module-system");
+        /* ========= プロジェクトルート判定 ========= */
+        Path workDir = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
+
+        // pom.xml があればそこをプロジェクトルートとみなす
+        Path projectRoot = Files.exists(workDir.resolve("pom.xml"))
+                ? workDir
+                : workDir.getParent();
+
+        /* ========= 出力先（blog-module-system） ========= */
+        Path target = projectRoot.resolve("blog-module-system");
+
         String javaOut = target.resolve("src/main/java").toString();
         String xmlOut  = target.resolve("src/main/resources/mapper").toString();
 
-        // 出力ディレクトリ作成
         Files.createDirectories(Paths.get(javaOut));
         Files.createDirectories(Paths.get(xmlOut));
 
-        // パッケージプレフィックスおよび対象テーブル
+        /* ========= パッケージ & 対象テーブル ========= */
         String basePkg = "com.manpowergroup.springboot.springboot3web.system";
+
         List<String> tables = (args != null && args.length > 0)
                 ? Arrays.asList(args)
                 : List.of("t_sys_user");
 
-        // 各ファイルの出力先設定
-        Map<OutputFile, String> paths = new HashMap<>();
-        paths.put(OutputFile.xml, xmlOut);
-        paths.put(OutputFile.controller,
-                infraRoot.resolve("target/generated-ignore").toString());
+        /* ========= 出力ファイル設定 ========= */
+        Map<OutputFile, String> pathInfo = new HashMap<>();
+        pathInfo.put(OutputFile.xml, xmlOut);
 
+        // Controller は生成しない（念のため捨て先を指定）
+        /*pathInfo.put(
+                OutputFile.controller,
+                projectRoot.resolve("target/generated-ignore").toString()
+        );*/
+
+        /* ========= Generator 実行 ========= */
         FastAutoGenerator.create(url, user, pwd)
-                .globalConfig(b -> b
+                .globalConfig(builder -> builder
                         .author("YAOXIA")
                         .outputDir(javaOut)
                         .dateType(DateType.TIME_PACK)
                         .disableOpenDir()
                 )
-                .packageConfig(b -> b
+                .packageConfig(builder -> builder
                         .parent(basePkg)
-                        .pathInfo(paths)
+                        .entity("entity")
+                        .pathInfo(pathInfo)
                 )
-                .strategyConfig(b -> b
+                .strategyConfig(builder -> builder
                         .addInclude(tables)
                         .addTablePrefix("t_sys_")
-                        .entityBuilder().enableLombok()
+
+                        // ===== Entity =====
+                        .entityBuilder()
+                        .enableLombok()
+                        .disableSerialVersionUID()
+
+                        // ===== Mapper =====
                         .mapperBuilder()
                         .enableBaseResultMap()
                         .enableBaseColumnList()
+
+                        // ===== Service =====
                         .serviceBuilder()
                         .formatServiceFileName("%sService")
                         .formatServiceImplFileName("%sServiceImpl")
                 )
-                // Controller テンプレートを無効化
+                // Controller テンプレート無効化
                 .templateConfig(t -> t.disable(TemplateType.CONTROLLER))
-                // Freemarker テンプレートエンジンを使用
+                // Freemarker 使用
                 .templateEngine(new FreemarkerTemplateEngine())
                 .execute();
     }

@@ -1,8 +1,6 @@
-package com.manpowergroup.springboot.springboot3web.admin.user;
+package com.manpowergroup.springboot.springboot3web.admin;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
-import com.manpowergroup.springboot.springboot3web.system.user.model.User;
-import com.manpowergroup.springboot.springboot3web.system.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
