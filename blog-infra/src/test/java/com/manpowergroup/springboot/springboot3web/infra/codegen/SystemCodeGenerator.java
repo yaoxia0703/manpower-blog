@@ -55,7 +55,7 @@ public class SystemCodeGenerator {
 
         List<String> tables = (args != null && args.length > 0)
                 ? Arrays.asList(args)
-                : List.of("t_sys_user");
+                : List.of("t_sys_role_permission");
 
         /* ========= 出力ファイル設定 ========= */
         Map<OutputFile, String> pathInfo = new HashMap<>();
@@ -98,6 +98,16 @@ public class SystemCodeGenerator {
                         .serviceBuilder()
                         .formatServiceFileName("%sService")
                         .formatServiceImplFileName("%sServiceImpl")
+
+                        // ======================================================
+                        // Controller は自動生成しない
+                        // 理由：
+                        // - Controller 層は業務仕様・認可設計に強く依存するため
+                        // - CRUD ベースの自動生成は本プロジェクトの設計方針に合わない
+                        // - API 設計・権限制御は手動実装とする
+                        // ======================================================
+                        .controllerBuilder()
+                        .disable()
                 )
                 // Controller テンプレート無効化
                 .templateConfig(t -> t.disable(TemplateType.CONTROLLER))
