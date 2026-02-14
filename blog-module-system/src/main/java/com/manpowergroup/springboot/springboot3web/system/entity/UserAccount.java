@@ -1,12 +1,11 @@
 package com.manpowergroup.springboot.springboot3web.system.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 import java.time.LocalDateTime;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * <p>
@@ -16,8 +15,7 @@ import lombok.Setter;
  * @author YAOXIA
  * @since 2025-12-18
  */
-@Getter
-@Setter
+@Data
 @TableName("t_sys_user_account")
 @Schema(description = "ユーザーログインアカウント")
 public class UserAccount {
@@ -30,7 +28,7 @@ public class UserAccount {
     private Long userId;
 
     @Schema(description = "アカウント種別（EMAIL / PHONE）")
-    private String accountType;
+    private AccountType accountType;
 
     @Schema(description = "ログイン識別子（メールアドレス／電話番号）")
     private String accountValue;
@@ -56,4 +54,3 @@ public class UserAccount {
     @TableLogic
     private Integer isDeleted;
 }
-

@@ -4,9 +4,9 @@ infra:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/blog_db_dev?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Tokyo
-    username: blog_user
-    password: your_password_here
+    url: jdbc:mysql://localhost:3306/blog_db?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Tokyo
+    username: root
+    password: Yx19900703.
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   autoconfigure:
