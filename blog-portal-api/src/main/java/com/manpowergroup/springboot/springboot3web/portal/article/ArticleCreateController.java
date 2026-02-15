@@ -2,11 +2,11 @@ package com.manpowergroup.springboot.springboot3web.portal.article;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleCreateReq;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleUpdateReq;
-import com.manpowergroup.springboot.springboot3web.content.article.service.ArticleService;
-import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleCreateReq;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleUpdateReq;
+import com.manpowergroup.springboot.springboot3web.content.service.ArticleService;
+import com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

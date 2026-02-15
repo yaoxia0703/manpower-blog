@@ -2,11 +2,11 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.manpowergroup.springboot.springboot3web.content.article.mapper.ArticleMapper">
+<mapper namespace="com.manpowergroup.springboot.springboot3web.content.mapper.ArticleMapper">
 
     <!-- 基本結果マッピング -->
     <resultMap id="BaseResultMap"
-               type="com.manpowergroup.springboot.springboot3web.content.article.entity.Article">
+               type="com.manpowergroup.springboot.springboot3web.content.entity.Article">
         <id column="id" property="id"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
@@ -23,7 +23,7 @@
 
     <!-- 記事一覧取得（ページング） -->
     <select id="selectPageVo"
-            resultType="com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo">
+            resultType="com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo">
 
         SELECT
         a.id,

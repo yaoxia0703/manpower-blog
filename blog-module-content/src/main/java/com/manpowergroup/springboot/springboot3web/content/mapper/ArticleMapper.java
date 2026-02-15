@@ -1,9 +1,9 @@
-package com.manpowergroup.springboot.springboot3web.content.article.mapper;
+package com.manpowergroup.springboot.springboot3web.content.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
-import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.entity.Article;
+import com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

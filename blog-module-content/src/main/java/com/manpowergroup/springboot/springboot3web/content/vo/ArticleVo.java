@@ -1,4 +1,4 @@
-package com.manpowergroup.springboot.springboot3web.content.article.vo;
+package com.manpowergroup.springboot.springboot3web.content.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -91,16 +91,27 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BizException.class)
     public Result<Object> handleBiz(BizException e) {
-        String key = (e.getMessage() == null || e.getMessage().isBlank())
+
+        // 1) messageKey：优先用 BizException 的 messageKey（或 getMessage 也行）
+        String key = (e.getMessageKey() == null || e.getMessageKey().isBlank())
                 ? ErrorCode.BIZ_ERROR.message()
-                : e.getMessage();
+                : e.getMessageKey();
+
+        // 2) code
         int code = (e.getCode() != null) ? e.getCode().code() : ErrorCode.BIZ_ERROR.code();
-        String msg = i18n(key);
-        String detail = i18n(key);
+
+        // 3) 前端 message：i18n（支持 args）
+        String msg = i18n(key, e.getArgs());
+
+        // 4) detail：优先用 BizException.detail（测试环境回显），没有则 fallback
+        String detail = (e.getDetail() != null && !e.getDetail().isBlank())
+                ? e.getDetail()
+                : null;
 
         logError(msg, detail, e);
         return Result.error(code, msg).withDetail(safeDetail(detail));
     }
+
 
     /* ====================== バリデーション例外 ====================== */
 

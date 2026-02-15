@@ -1,12 +1,12 @@
-package com.manpowergroup.springboot.springboot3web.content.article.service;
+package com.manpowergroup.springboot.springboot3web.content.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleCreateReq;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleUpdateReq;
-import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
-import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleCreateReq;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleUpdateReq;
+import com.manpowergroup.springboot.springboot3web.content.entity.Article;
+import com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo;
 
 /**
  * 記事サービスインターフェース

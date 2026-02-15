@@ -1,4 +1,4 @@
-package com.manpowergroup.springboot.springboot3web.content.article.entity;
+package com.manpowergroup.springboot.springboot3web.content.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;

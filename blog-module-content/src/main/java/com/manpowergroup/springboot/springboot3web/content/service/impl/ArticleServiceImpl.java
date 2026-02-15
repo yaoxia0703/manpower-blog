@@ -1,16 +1,16 @@
-package com.manpowergroup.springboot.springboot3web.content.article.service.impl;
+package com.manpowergroup.springboot.springboot3web.content.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleCreateReq;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.content.article.dto.ArticleUpdateReq;
-import com.manpowergroup.springboot.springboot3web.content.article.entity.Article;
-import com.manpowergroup.springboot.springboot3web.content.article.mapper.ArticleMapper;
-import com.manpowergroup.springboot.springboot3web.content.article.service.ArticleService;
-import com.manpowergroup.springboot.springboot3web.content.article.vo.ArticleVo;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleCreateReq;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.dto.ArticleUpdateReq;
+import com.manpowergroup.springboot.springboot3web.content.entity.Article;
+import com.manpowergroup.springboot.springboot3web.content.mapper.ArticleMapper;
+import com.manpowergroup.springboot.springboot3web.content.service.ArticleService;
+import com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;

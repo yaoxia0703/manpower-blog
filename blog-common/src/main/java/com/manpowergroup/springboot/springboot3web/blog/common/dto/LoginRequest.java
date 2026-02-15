@@ -1,4 +1,4 @@
-package com.manpowergroup.springboot.springboot3web.blog.common.dto.auth;
+package com.manpowergroup.springboot.springboot3web.blog.common.dto;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
 import io.swagger.v3.oas.annotations.media.Schema;
