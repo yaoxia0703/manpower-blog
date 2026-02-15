@@ -27,7 +27,6 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserAccount> implements UserAccountService {
-    private final UserAccountMapper userAccountMapper;
     private final UserRoleMapper userRoleMapper;
     private final RoleMapper roleMapper;
 

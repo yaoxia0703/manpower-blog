@@ -75,3 +75,11 @@ logging:
 app:
   trace-id:
     enabled: true   # true=有効 / false=無効
+
+
+security:
+  jwt:
+    # ✅ 必须是 Base64 字符串（对应 32 bytes 以上的原始 key）
+    secret: "bXktZGV2LWp3dC1zZWNyZXQta2V5LWxlbmd0aC1tdXN0LWJlLTMyLWJ5dGVzIQ=="
+    issuer: "springboot3web"
+    expire-seconds: 7200
