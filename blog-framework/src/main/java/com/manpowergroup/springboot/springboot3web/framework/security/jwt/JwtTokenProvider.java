@@ -101,9 +101,9 @@ public class JwtTokenProvider {
     /**
      * 从 token 获取 username
      */
-    public String getUsername(String token) {
-        Object username = parseClaims(token).get("username");
-        return username == null ? "" : String.valueOf(username);
+    public String getNickName(String token) {
+        Object nickName = parseClaims(token).get("nickName");
+        return nickName == null ? "" : String.valueOf(nickName);
     }
 
     private List<String> safeList(List<String> list) {
