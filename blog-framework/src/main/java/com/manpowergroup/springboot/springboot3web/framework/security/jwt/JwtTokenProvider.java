@@ -50,7 +50,7 @@ public class JwtTokenProvider {
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(exp))
                 .claim("roles", String.join(",", safeList(user.getRoleNames())))
-                .claim("username", StringUtils.nullToEmpty(user.getUsername()))
+                .claim("nickName", StringUtils.nullToEmpty(user.getNickName()))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }

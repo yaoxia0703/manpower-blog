@@ -1,8 +1,10 @@
 package com.manpowergroup.springboot.springboot3web.system.mapper;
 
+import com.manpowergroup.springboot.springboot3web.system.dto.LoginAccountUserDTO;
 import com.manpowergroup.springboot.springboot3web.system.entity.UserAccount;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -15,4 +17,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserAccountMapper extends BaseMapper<UserAccount> {
 
+    LoginAccountUserDTO findLoginUserByAccountTypeAndAccountValue(
+            @Param("accountType") String accountType,
+            @Param("accountValue") String accountValue
+    );
 }

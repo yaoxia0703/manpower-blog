@@ -10,6 +10,7 @@ import com.manpowergroup.springboot.springboot3web.system.service.LoginService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/system/auth")
 @AllArgsConstructor
+@Slf4j
 public class LoginController {
 
     private final LoginService loginService;
@@ -28,11 +30,18 @@ public class LoginController {
             @Valid @RequestBody LoginRequest loginRequest,
             HttpServletResponse response
     ) {
+
+        log.info("Login attempt: accountType={}, accountValue={}",
+                loginRequest.getAccountType(),
+                loginRequest.getAccountValue());
+
         LoginUser loginUser = loginService.login(loginRequest);
 
         String token = jwtTokenProvider.generateToken(loginUser);
 
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+
+        log.info("Login success: userId={}", loginUser.getUserId());
 
         return Result.ok(loginUser);
     }

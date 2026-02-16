@@ -20,5 +20,29 @@
     <sql id="Base_Column_List">
         id, user_id, account_type, account_value, password, verified, status, created_at, updated_at, is_deleted
     </sql>
+    <select id="findLoginUserByAccountTypeAndAccountValue"
+            resultType="com.manpowergroup.springboot.springboot3web.system.dto.LoginAccountUserDTO">
+
+        SELECT u.id             AS userId,
+               ua.id            AS accountId,
+               u.nick_name      AS nickName,
+               ua.account_type  AS accountType,
+               ua.account_value AS accountValue,
+
+               u.status         AS userStatus,
+               ua.status        AS accountStatus,
+               ua.verified      AS verified,
+
+               ua.password      AS password
+        FROM t_sys_user u
+                 JOIN t_sys_user_account ua
+                      ON u.id = ua.user_id
+        WHERE ua.account_type = #{accountType}
+          AND ua.account_value = #{accountValue}
+          AND u.is_deleted = 0
+          AND ua.is_deleted = 0 LIMIT 1;
+
+    </select>
+
 
 </mapper>

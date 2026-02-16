@@ -18,8 +18,8 @@ public class LoginUser  {
     @Schema(description = "ユーザーID（t_sys_user_account.id）")
     private Long accountId;
 
-    @Schema(description = "ユーザー氏名（t_sys_user.id）")
-    private String username;
+    @Schema(description = "ユーザー氏名（t_sys_user.nick_name）")
+    private String nickName;
 
     @Schema(description = "アカウント種別（EMAIL / PHONE）")
     private AccountType accountType;

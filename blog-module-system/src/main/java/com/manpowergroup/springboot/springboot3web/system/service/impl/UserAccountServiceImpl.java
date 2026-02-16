@@ -2,6 +2,7 @@ package com.manpowergroup.springboot.springboot3web.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
+import com.manpowergroup.springboot.springboot3web.system.dto.LoginAccountUserDTO;
 import com.manpowergroup.springboot.springboot3web.system.entity.Role;
 import com.manpowergroup.springboot.springboot3web.system.entity.UserAccount;
 import com.manpowergroup.springboot.springboot3web.system.entity.UserRole;
@@ -27,6 +28,7 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserAccount> implements UserAccountService {
+    private UserAccountMapper userAccountMapper;
     private final UserRoleMapper userRoleMapper;
     private final RoleMapper roleMapper;
 
@@ -56,5 +58,10 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
                 .stream()
                 .map(Role::getName)
                 .toList();
+    }
+
+    @Override
+    public Optional<LoginAccountUserDTO> findLoginUserByAccountTypeAndAccountValue(String accountType, String accountValue) {
+        return Optional.ofNullable(userAccountMapper.findLoginUserByAccountTypeAndAccountValue(accountType, accountValue));
     }
 }
