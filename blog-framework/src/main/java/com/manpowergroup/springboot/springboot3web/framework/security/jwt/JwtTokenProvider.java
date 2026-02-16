@@ -1,6 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.framework.security.jwt;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.LoginUser;
+import com.manpowergroup.springboot.springboot3web.blog.common.util.CollectionUtils;
 import com.manpowergroup.springboot.springboot3web.blog.common.util.StringUtils;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -49,7 +49,7 @@ public class JwtTokenProvider {
                 .setSubject(String.valueOf(user.getUserId()))
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(exp))
-                .claim("roles", String.join(",", safeList(user.getRoleNames())))
+                .claim("roles", String.join(",", CollectionUtils.safeList(user.getRoleNames())))
                 .claim("nickName", StringUtils.nullToEmpty(user.getNickName()))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
@@ -99,14 +99,12 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 从 token 获取 username
+     * 从 token 获取 nickName
      */
     public String getNickName(String token) {
         Object nickName = parseClaims(token).get("nickName");
         return nickName == null ? "" : String.valueOf(nickName);
     }
 
-    private List<String> safeList(List<String> list) {
-        return list == null ? List.of() : list;
-    }
+
 }
