@@ -17,5 +17,45 @@
     <sql id="Base_Column_List">
         id, username, nick_name, status, created_at, updated_at, is_deleted
     </sql>
+    <resultMap id="LoginUserResultMap"
+               type="com.manpowergroup.springboot.springboot3web.blog.common.dto.LoginUser">
+
+        <id property="userId" column="userId"/>
+        <result property="accountId" column="accountId"/>
+        <result property="nickName" column="nickName"/>
+        <result property="accountType" column="accountType"/>
+        <result property="accountValue" column="accountValue"/>
+
+        <collection property="roleNames" ofType="java.lang.String">
+            <result column="roleName"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="selectLoginUserDetailByUserId"
+            resultMap="LoginUserResultMap">
+
+        SELECT
+            u.id             AS userId,
+            ua.id            AS accountId,
+            u.nick_name      AS nickName,
+            ua.account_type  AS accountType,
+            ua.account_value AS accountValue,
+            r.name           AS roleName
+        FROM t_sys_user u
+                 LEFT JOIN t_sys_user_account ua
+                           ON u.id = ua.user_id
+                               AND ua.is_deleted = 0
+                 LEFT JOIN t_sys_user_role ur
+                           ON u.id = ur.user_id
+                               AND ur.is_deleted = 0
+                 LEFT JOIN t_sys_role r
+                           ON ur.role_id = r.id
+                               AND r.is_deleted = 0
+        WHERE u.id = #{userId}
+          AND u.is_deleted = 0
+
+    </select>
+
 
 </mapper>

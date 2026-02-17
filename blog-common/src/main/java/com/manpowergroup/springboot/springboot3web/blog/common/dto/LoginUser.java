@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
-@Schema(description = "ログイン成功レスポンス（セッション保持）")
+@Schema(description = "ログイン成功レスポンス（ユーザー情報）")
 public class LoginUser  {
 
     @Schema(description = "ユーザーID（t_sys_user.id）")

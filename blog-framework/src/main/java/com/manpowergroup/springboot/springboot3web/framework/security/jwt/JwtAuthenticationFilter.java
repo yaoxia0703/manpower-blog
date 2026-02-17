@@ -1,5 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.framework.security.jwt;
 
+import com.manpowergroup.springboot.springboot3web.framework.security.authority.UserAuthorityProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,17 +14,34 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserAuthorityProvider userAuthorityProvider;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(
+            JwtTokenProvider jwtTokenProvider,
+            UserAuthorityProvider userAuthorityProvider
+    ) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.userAuthorityProvider = userAuthorityProvider;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        final String path = request.getRequestURI();
+        if (path == null || path.isBlank()) {
+            return false;
+        }
+
+        return path.startsWith("/api/system/auth/")
+                || path.startsWith("/error/")
+                || path.equals("/favicon.ico");
+
     }
 
     @Override
@@ -33,46 +51,65 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String token = resolveToken(request);
+        final String token = resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validate(token)
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            Long userId = jwtTokenProvider.getUserId(token);
-
-            // roles: "admin,user" -> ROLE_admin, ROLE_user
-            List<SimpleGrantedAuthority> authorities = parseAuthorities(jwtTokenProvider.getRoles(token));
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userId, null, authorities);
-
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        if (!jwtTokenProvider.validate(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final Long userId = jwtTokenProvider.getUserId(token);
+        if (userId == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final List<String> permissionCodes = userAuthorityProvider.loadPermissionCodes(userId);
+
+        final List<SimpleGrantedAuthority> authorities = permissionCodes.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+
+        final var principal = new LoginPrincipal(userId);
+
+        final UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(principal, null, authorities);
+
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || header.isBlank()) return null;
-
-        // Authorization: Bearer xxx
-        if (!header.startsWith("Bearer ")) return null;
-
-        String token = header.substring(7);
-        return token.isBlank() ? null : token;
-    }
-
-    private List<SimpleGrantedAuthority> parseAuthorities(String rolesCsv) {
-        if (rolesCsv == null || rolesCsv.isBlank()) {
-            return List.of();
+        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || header.isBlank()) {
+            return null;
         }
-        return Arrays.stream(rolesCsv.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .map(r -> r.startsWith("ROLE_") ? r : "ROLE_" + r)
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+
+        final String prefix = "Bearer ";
+        if (header.length() < prefix.length()) {
+            return null;
+        }
+        if (!header.regionMatches(true, 0, prefix, 0, prefix.length())) {
+            return null;
+        }
+
+        final String token = header.substring(prefix.length()).trim();
+        return token.isBlank() ? null : token;
     }
 }

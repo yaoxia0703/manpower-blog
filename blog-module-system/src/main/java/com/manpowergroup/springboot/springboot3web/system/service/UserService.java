@@ -1,5 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.system.service;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.dto.LoginUser;
 import com.manpowergroup.springboot.springboot3web.system.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,5 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-12-18
  */
 public interface UserService extends IService<User> {
-
+    public LoginUser findLoginUserDetailByUserId(Long userId);
 }
