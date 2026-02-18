@@ -75,6 +75,10 @@ logging:
 app:
   trace-id:
     enabled: true   # true=有効 / false=無効
+  page:
+    default-page-num: 1
+    default-page-size: 10
+    max-page-size: 100
 
 
 security:
