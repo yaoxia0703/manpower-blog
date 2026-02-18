@@ -5,7 +5,7 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.LoginUser;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.framework.security.PasswordService;
-import com.manpowergroup.springboot.springboot3web.system.dto.LoginAccountUserDTO;
+import com.manpowergroup.springboot.springboot3web.system.dto.userAccount.LoginAccountUserDTO;
 import com.manpowergroup.springboot.springboot3web.system.service.LoginService;
 import com.manpowergroup.springboot.springboot3web.system.service.UserAccountService;
 import lombok.AllArgsConstructor;

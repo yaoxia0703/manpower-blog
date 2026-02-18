@@ -1,11 +1,8 @@
 package com.manpowergroup.springboot.springboot3web.blog.common.util;
 
-import java.util.Objects;
-
 public final class StringUtils {
 
-    private StringUtils() {
-    }
+    private StringUtils() {}
 
     /**
      * null → ""
@@ -15,16 +12,30 @@ public final class StringUtils {
     }
 
     /**
-     * "" → null
+     * "" or blank → null
      */
     public static String emptyToNull(String value) {
-        return (value == null || value.isBlank()) ? null : value;
+        return hasText(value) ? value.trim() : null;
     }
 
     /**
-     * 判断是否有文本
+     * 判断是否有文本（非 null 且非空白）
      */
     public static boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    /**
+     * 去除前后空格（null 安全）
+     */
+    public static String trim(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    /**
+     * null/blank → null
+     */
+    public static String normalize(String value) {
+        return hasText(value) ? value.trim() : null;
     }
 }

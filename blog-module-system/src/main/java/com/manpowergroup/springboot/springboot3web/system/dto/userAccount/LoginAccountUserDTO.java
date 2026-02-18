@@ -1,4 +1,4 @@
-package com.manpowergroup.springboot.springboot3web.system.dto;
+package com.manpowergroup.springboot.springboot3web.system.dto.userAccount;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

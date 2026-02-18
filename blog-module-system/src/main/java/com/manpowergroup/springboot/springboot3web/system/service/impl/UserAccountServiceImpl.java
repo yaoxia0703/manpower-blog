@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
 import com.manpowergroup.springboot.springboot3web.blog.common.util.CollectionUtils;
 import com.manpowergroup.springboot.springboot3web.blog.common.util.StringUtils;
-import com.manpowergroup.springboot.springboot3web.system.dto.LoginAccountUserDTO;
+import com.manpowergroup.springboot.springboot3web.system.dto.userAccount.LoginAccountUserDTO;
 import com.manpowergroup.springboot.springboot3web.system.entity.Role;
 import com.manpowergroup.springboot.springboot3web.system.entity.UserAccount;
 import com.manpowergroup.springboot.springboot3web.system.entity.UserRole;

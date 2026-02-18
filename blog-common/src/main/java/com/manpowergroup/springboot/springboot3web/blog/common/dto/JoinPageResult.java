@@ -9,18 +9,15 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * <p>
- * 複数テーブルを結合した検索結果用ページオブジェクト
- * </p>
- * <p>
- * 通常の PageResult と区別するために作成。
- * </p>
+ * 複数テーブル結合検索結果用ページオブジェクト
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(name = "JoinPageResult", description = "複数テーブル結合検索結果用ページオブジェクト")
 public class JoinPageResult<T> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "データリスト")
     private List<T> records;
@@ -37,19 +34,28 @@ public class JoinPageResult<T> implements Serializable {
     @Schema(description = "総ページ数")
     private long pages;
 
+    /**
+     * pages はここだけで計算する（ロジックの一元化）
+     */
     public JoinPageResult(List<T> records, long total, long pageNum, long pageSize) {
         this.records = records;
         this.total = total;
         this.pageNum = pageNum;
         this.pageSize = pageSize;
-        this.pages = (pageSize == 0) ? 0 : (long) Math.ceil((double) total / pageSize);
+        this.pages = calculatePages(total, pageSize);
     }
 
+    /**
+     * factory method（ページ情報の保持のみ。補正は PageUtil 側で行う）
+     */
     public static <T> JoinPageResult<T> of(List<T> records, long total, long pageNum, long pageSize) {
-        long safeSize = (pageSize <= 0) ? 10 : Math.min(pageSize, 100);
-        long pages = (long) Math.ceil((double) total / safeSize);
-        return new JoinPageResult<>(records, total, pageNum, safeSize, pages);
+        return new JoinPageResult<>(records, total, pageNum, pageSize);
     }
 
+    private static long calculatePages(long total, long pageSize) {
+        if (pageSize <= 0) {
+            return 0;
+        }
+        return (long) Math.ceil((double) total / pageSize);
+    }
 }
-

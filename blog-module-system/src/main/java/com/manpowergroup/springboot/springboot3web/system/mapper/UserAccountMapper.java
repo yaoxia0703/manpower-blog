@@ -1,6 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.system.mapper;
 
-import com.manpowergroup.springboot.springboot3web.system.dto.LoginAccountUserDTO;
+import com.manpowergroup.springboot.springboot3web.system.dto.userAccount.LoginAccountUserDTO;
 import com.manpowergroup.springboot.springboot3web.system.entity.UserAccount;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;

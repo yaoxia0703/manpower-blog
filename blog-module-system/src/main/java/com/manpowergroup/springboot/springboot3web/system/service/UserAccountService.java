@@ -1,7 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.system.service;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
-import com.manpowergroup.springboot.springboot3web.system.dto.LoginAccountUserDTO;
+import com.manpowergroup.springboot.springboot3web.system.dto.userAccount.LoginAccountUserDTO;
 import com.manpowergroup.springboot.springboot3web.system.entity.UserAccount;
 import com.baomidou.mybatisplus.extension.service.IService;
 
