@@ -1,8 +1,11 @@
 package com.manpowergroup.springboot.springboot3web.system.service;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
+import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
+import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionQueryRequest;
+import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionSaveOrUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.entity.Permission;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,5 +20,18 @@ import java.util.List;
 public interface PermissionService extends IService<Permission> {
 
     List<String> selectPermissionCodesByUserId(Long userId);
+
+    JoinPageResult<Permission> pagePermission(PermissionQueryRequest queryRequest, PageRequest pageRequest);
+
+    Permission getPermissionById(Long id);
+
+    Long CreatePermission(Permission permission);
+
+    void updatePermission(Long id, PermissionSaveOrUpdateRequest request);
+
+    void deletePermission(Long id);
+
+    void changeStatus(Long id, Byte status);
+
 
 }

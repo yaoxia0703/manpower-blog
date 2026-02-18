@@ -1,5 +1,9 @@
 package com.manpowergroup.springboot.springboot3web.system.service.impl;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
+import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
+import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionQueryRequest;
+import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionSaveOrUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.entity.Permission;
 import com.manpowergroup.springboot.springboot3web.system.mapper.PermissionMapper;
 import com.manpowergroup.springboot.springboot3web.system.service.PermissionService;
@@ -25,5 +29,35 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     @Override
     public List<String> selectPermissionCodesByUserId(Long userId) {
         return permissionMapper.selectPermissionCodesByUserId(userId);
+    }
+
+    @Override
+    public JoinPageResult<Permission> pagePermission(PermissionQueryRequest queryRequest, PageRequest pageRequest) {
+        return null;
+    }
+
+    @Override
+    public Permission getPermissionById(Long id) {
+        return null;
+    }
+
+    @Override
+    public Long CreatePermission(Permission permission) {
+        return 0L;
+    }
+
+    @Override
+    public void updatePermission(Long id, PermissionSaveOrUpdateRequest request) {
+
+    }
+
+    @Override
+    public void deletePermission(Long id) {
+
+    }
+
+    @Override
+    public void changeStatus(Long id, Byte status) {
+
     }
 }

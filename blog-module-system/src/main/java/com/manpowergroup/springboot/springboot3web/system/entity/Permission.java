@@ -1,11 +1,14 @@
 package com.manpowergroup.springboot.springboot3web.system.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * <p>
@@ -15,9 +18,12 @@ import lombok.Setter;
  * @author YAOXIA
  * @since 2025-12-18
  */
-@Getter
-@Setter
+@Data
 @TableName("t_sys_permission")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Accessors(chain=true)
 public class Permission {
 
     /**
@@ -69,15 +75,19 @@ public class Permission {
     /**
      * 作成日時
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
     /**
      * 更新日時
      */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
     /**
      * 論理削除フラグ（0=未削除、1=削除済み）
      */
+    @TableLogic
+    @TableField(value = "is_deleted")
     private Byte isDeleted;
 }
