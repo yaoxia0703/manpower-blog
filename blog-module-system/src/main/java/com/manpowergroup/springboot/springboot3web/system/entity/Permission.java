@@ -1,9 +1,12 @@
 package com.manpowergroup.springboot.springboot3web.system.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.HttpMethod;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.PermissionType;
 
 import java.time.LocalDateTime;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,19 +14,14 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
- * <p>
  * 権限マスタ（MENU/BUTTON/API）
- * </p>
- *
- * @author YAOXIA
- * @since 2025-12-18
  */
 @Data
 @TableName("t_sys_permission")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Accessors(chain=true)
+@Accessors(chain = true)
 public class Permission {
 
     /**
@@ -50,7 +48,7 @@ public class Permission {
     /**
      * 権限種別（1=MENU, 2=BUTTON, 3=API）
      */
-    private Byte type;
+    private PermissionType type;
 
     /**
      * 対象パス（MENU/API 用）
@@ -58,9 +56,10 @@ public class Permission {
     private String path;
 
     /**
-     * HTTPメソッド（API 用：GET/POST/PUT/DELETE）
+     * HTTPメソッド（API 用：GET/POST/PUT/DELETE/PATCH）
+     * DBは varchar(10) のままでOK（enum名がそのまま保存される）
      */
-    private String method;
+    private HttpMethod method;
 
     /**
      * 表示順
@@ -70,7 +69,7 @@ public class Permission {
     /**
      * 状態（0=無効、1=有効）
      */
-    private Byte status;
+    private Status status;
 
     /**
      * 作成日時

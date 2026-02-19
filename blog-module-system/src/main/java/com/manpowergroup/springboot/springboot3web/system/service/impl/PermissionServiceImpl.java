@@ -4,6 +4,7 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResul
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
 import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionQueryRequest;
 import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionSaveOrUpdateRequest;
+import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionStatusUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.entity.Permission;
 import com.manpowergroup.springboot.springboot3web.system.mapper.PermissionMapper;
 import com.manpowergroup.springboot.springboot3web.system.service.PermissionService;
@@ -57,7 +58,15 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
-    public void changeStatus(Long id, Byte status) {
+    public void changeStatus(Long id, PermissionStatusUpdateRequest request) {
+
+    }
+
+    private  void validateSaveOrUpdateRequest(){
+
+    }
+
+    private void validateStatus(PermissionStatusUpdateRequest request){
 
     }
 }

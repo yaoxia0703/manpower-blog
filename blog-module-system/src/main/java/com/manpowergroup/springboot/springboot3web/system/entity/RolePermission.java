@@ -1,8 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.system.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,15 +38,19 @@ public class RolePermission {
     /**
      * 作成日時
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
     /**
      * 更新日時
      */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
     /**
      * 論理削除フラグ（0=未削除、1=削除済み）
      */
+    @TableLogic
+    @TableField(value = "is_deleted")
     private Byte isDeleted;
 }

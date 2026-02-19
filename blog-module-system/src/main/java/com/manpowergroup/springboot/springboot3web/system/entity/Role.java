@@ -3,6 +3,7 @@ package com.manpowergroup.springboot.springboot3web.system.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import java.time.LocalDateTime;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class Role {
     /**
      * 状態（0=無効、1=有効）
      */
-    private Byte status;
+    private Status status;
 
     /**
      * 作成日時
