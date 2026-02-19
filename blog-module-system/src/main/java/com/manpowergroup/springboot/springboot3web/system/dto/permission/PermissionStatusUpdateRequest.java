@@ -2,8 +2,6 @@ package com.manpowergroup.springboot.springboot3web.system.dto.permission;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "権限状態変更リクエスト")
