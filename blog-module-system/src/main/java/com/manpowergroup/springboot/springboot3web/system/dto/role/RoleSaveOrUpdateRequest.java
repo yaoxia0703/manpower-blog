@@ -1,5 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.system.dto.role;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "ロール新規作成／更新リクエスト")
@@ -27,9 +28,8 @@ public record RoleSaveOrUpdateRequest(
 
         @Schema(
                 description = "状態（0=無効、1=有効）",
-                example = "1",
-                requiredMode = Schema.RequiredMode.REQUIRED
+                example = "1"
         )
-        Byte status
+        Status status
 
 ) {}
