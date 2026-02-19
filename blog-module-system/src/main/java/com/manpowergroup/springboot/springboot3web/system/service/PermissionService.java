@@ -4,6 +4,7 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResul
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
 import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionQueryRequest;
 import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionSaveOrUpdateRequest;
+import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionStatusUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.entity.Permission;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -31,7 +32,7 @@ public interface PermissionService extends IService<Permission> {
 
     void deletePermission(Long id);
 
-    void changeStatus(Long id, Byte status);
+    void changeStatus(Long id, PermissionStatusUpdateRequest request);
 
 
 }

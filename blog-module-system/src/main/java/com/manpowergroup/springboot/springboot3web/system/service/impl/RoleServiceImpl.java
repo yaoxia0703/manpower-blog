@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
+import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
+import com.manpowergroup.springboot.springboot3web.blog.common.util.PageUtil;
 import com.manpowergroup.springboot.springboot3web.blog.common.util.StringUtils;
 import com.manpowergroup.springboot.springboot3web.system.dto.role.RoleQueryRequest;
 import com.manpowergroup.springboot.springboot3web.system.dto.role.RoleSaveOrUpdateRequest;
@@ -15,9 +18,6 @@ import com.manpowergroup.springboot.springboot3web.system.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
-import com.manpowergroup.springboot.springboot3web.blog.common.util.PageUtil;
-
 
 import java.util.Locale;
 
@@ -64,7 +64,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         );
     }
 
-
     @Override
     public Role getRoleById(Long id) {
         if (id == null) {
@@ -99,7 +98,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
         baseMapper.insert(role);
 
-        // ★ 必須ログ：登録（監査・トラブルシュート用）
         log.info("ロールを登録しました。id={}, code={}, name={}, status={}, sort={}",
                 role.getId(), code, name, status, sort);
 
@@ -133,7 +131,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
         baseMapper.updateById(existing);
 
-        // ★ 必須ログ：更新
         log.info("ロールを更新しました。id={}, code={}, name={}, status={}, sort={}",
                 existing.getId(), existing.getCode(), existing.getName(), existing.getStatus(), existing.getSort());
     }
@@ -145,7 +142,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロールIDが指定されていません。");
         }
 
-        // 削除前に存在確認（ログに code/name を残せる＆NOT_FOUNDを明確化）
         final var existing = getRoleById(id);
 
         final var affected = baseMapper.deleteById(id);
@@ -153,14 +149,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             throw BizException.withDetail(ErrorCode.NOT_FOUND, "ロールが存在しません。id=" + id);
         }
 
-        // ★ 必須ログ：削除（論理削除でも記録）
         log.info("ロールを削除しました。id={}, code={}, name={}",
                 existing.getId(), existing.getCode(), existing.getName());
     }
 
     @Override
     @Transactional
-    public void changeStatus(Long id, Byte status) {
+    public void changeStatus(Long id, Status status) {
         if (id == null) {
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロールIDが指定されていません。");
         }
@@ -173,7 +168,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         role.setStatus(newStatus);
         baseMapper.updateById(role);
 
-        // ★ 必須ログ：状態変更（運用でよく追う）
         log.info("ロールの状態を変更しました。id={}, code={}, name={}, status:{} -> {}",
                 role.getId(), role.getCode(), role.getName(), oldStatus, newStatus);
     }
@@ -209,9 +203,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         }
     }
 
-    private Byte normalizeStatus(Byte status) {
-        if (status == null) return (byte) 1;
-        if (status != 0 && status != 1) {
+    private Status normalizeStatus(Status status) {
+        if (status == null) return Status.ENABLED; // 以前の default=1 と同等
+        final int code = status.toJson(); // JsonValue が 0/1 を返す設計
+        if (code != 0 && code != 1) {
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "status は 0/1 のみ指定可能です。");
         }
         return status;
