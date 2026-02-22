@@ -269,6 +269,18 @@ graph TD
 
     INF -. test/dev only .-> MS
     INF -. test/dev only .-> MC
+
+    classDef core fill:#eef;
+    classDef api fill:#efe;
+    classDef infra fill:#ffe;
+
+    class CM core
+    class FW core
+    class MS core
+    class MC core
+    class AA api
+    class PA api
+    class INF infra
 ```
 
 ## 9. 実装整合性に関する注記
