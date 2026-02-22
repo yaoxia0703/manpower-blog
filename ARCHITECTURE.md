@@ -198,21 +198,21 @@
 ```mermaid
 flowchart LR
     %% FE: Frontend（別リポジトリ）
-    subgraph FE[Frontend]
-      A[Admin Console]
-      P[Portal Web]
+    subgraph FE["Frontend"]
+      A["Admin Console"]
+      P["Portal Web"]
     end
 
     %% BE: manpower-blog Backend（Spring Boot 3）
-    subgraph BE[manpower-blog Backend]
-      S[blog-starter]
-      AA[blog-admin-api]
-      PA[blog-portal-api]
-      MS[blog-module-system]
-      MC[blog-module-content]
-      FW[blog-framework]
-      CM[blog-common]
-      INF[blog-infra (dev/test)]
+    subgraph BE["manpower-blog Backend"]
+      S["blog-starter"]
+      AA["blog-admin-api"]
+      PA["blog-portal-api"]
+      MS["blog-module-system"]
+      MC["blog-module-content"]
+      FW["blog-framework"]
+      CM["blog-common"]
+      INF["blog-infra (dev/test)"]
     end
 
     A -->|REST| AA
@@ -240,14 +240,14 @@ flowchart LR
 ### 8.2 モジュール依存図（Maven）
 ```mermaid
 graph TD
-    CM[blog-common]
-    FW[blog-framework]
-    INF[blog-infra]
-    MS[blog-module-system]
-    MC[blog-module-content]
-    AA[blog-admin-api]
-    PA[blog-portal-api]
-    ST[blog-starter]
+    CM["blog-common"]
+    FW["blog-framework"]
+    INF["blog-infra"]
+    MS["blog-module-system"]
+    MC["blog-module-content"]
+    AA["blog-admin-api"]
+    PA["blog-portal-api"]
+    ST["blog-starter"]
 
     FW --> CM
     MS --> FW
