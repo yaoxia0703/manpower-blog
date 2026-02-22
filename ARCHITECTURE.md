@@ -197,12 +197,14 @@
 ### 8.1 システム構成図
 ```mermaid
 flowchart LR
-    subgraph FE[Frontend (別リポジトリ)]
+    %% FE: Frontend（別リポジトリ）
+    subgraph FE[Frontend]
       A[Admin Console]
       P[Portal Web]
     end
 
-    subgraph BE[manpower-blog Backend (Spring Boot 3)]
+    %% BE: manpower-blog Backend（Spring Boot 3）
+    subgraph BE[manpower-blog Backend]
       S[blog-starter]
       AA[blog-admin-api]
       PA[blog-portal-api]
