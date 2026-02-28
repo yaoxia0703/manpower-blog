@@ -16,6 +16,7 @@ import com.manpowergroup.springboot.springboot3web.system.entity.Role;
 import com.manpowergroup.springboot.springboot3web.system.mapper.RoleMapper;
 import com.manpowergroup.springboot.springboot3web.system.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +39,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     ) {
 
         final Page<Role> page =
-                pageUtil.toPage(pageRequest == null ? new com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest() : pageRequest);
+                pageUtil.toPage(pageRequest == null ? new PageRequest() : pageRequest);
 
         final var qw = new LambdaQueryWrapper<Role>()
                 .orderByAsc(Role::getSort)
@@ -80,13 +81,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     @Transactional
     public Long createRole(RoleSaveOrUpdateRequest request) {
-        validateRequest(request);
 
         final var code = StringUtils.normalize(request.code()).toUpperCase(Locale.ROOT);
-        ensureCodeUnique(code, null);
-
         final var name = StringUtils.normalize(request.name());
-        final var status = normalizeStatus(request.status());
+        final var status = request.status();
         final var sort = request.sort() == null ? 0 : request.sort();
 
         final var role = Role.builder()
@@ -96,10 +94,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 .status(status)
                 .build();
 
+        // UNIQUE違反は GlobalExceptionHandler で一括処理
         baseMapper.insert(role);
 
-        log.info("ロールを登録しました。id={}, code={}, name={}, status={}, sort={}",
-                role.getId(), code, name, status, sort);
+        log.info("ロールを登録しました。entity={}", role);
 
         return role.getId();
     }
@@ -111,28 +109,22 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         if (id == null) {
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロールIDが指定されていません。");
         }
-        validateRequest(request);
 
         final var existing = getRoleById(id);
 
         final var code = StringUtils.normalize(request.code()).toUpperCase(Locale.ROOT);
-        if (!code.equals(existing.getCode())) {
-            ensureCodeUnique(code, id);
-            existing.setCode(code);
-        }
-
         final var name = StringUtils.normalize(request.name());
-        final var status = normalizeStatus(request.status());
+        final var status = request.status();
         final var sort = request.sort() == null ? 0 : request.sort();
 
-        existing.setName(name)
+        existing.setCode(code)
+                .setName(name)
                 .setStatus(status)
                 .setSort(sort);
 
         baseMapper.updateById(existing);
 
-        log.info("ロールを更新しました。id={}, code={}, name={}, status={}, sort={}",
-                existing.getId(), existing.getCode(), existing.getName(), existing.getStatus(), existing.getSort());
+        log.info("ロールを更新しました。entity={}", existing);
     }
 
     @Override
@@ -149,8 +141,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             throw BizException.withDetail(ErrorCode.NOT_FOUND, "ロールが存在しません。id=" + id);
         }
 
-        log.info("ロールを削除しました。id={}, code={}, name={}",
-                existing.getId(), existing.getCode(), existing.getName());
+        log.info(
+                "ロールを削除しました。id={}, code={}, name={}",
+                existing.getId(),
+                existing.getCode(),
+                existing.getName()
+        );
     }
 
     @Override
@@ -162,53 +158,23 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
         final var role = getRoleById(id);
 
-        final var newStatus = normalizeStatus(status);
-        final var oldStatus = role.getStatus();
 
-        role.setStatus(newStatus);
+        final var oldStatus = role.getStatus();
+        if (oldStatus == status) {
+            return;
+        }
+
+        role.setStatus(status);
         baseMapper.updateById(role);
 
-        log.info("ロールの状態を変更しました。id={}, code={}, name={}, status:{} -> {}",
-                role.getId(), role.getCode(), role.getName(), oldStatus, newStatus);
+        log.info(
+                "ROLE_STATUS_CHANGED id={}, code={}, oldStatus={}, newStatus={}",
+                role.getId(),
+                role.getCode(),
+                oldStatus,
+                status
+        );
     }
 
-    private void validateRequest(RoleSaveOrUpdateRequest request) {
-        if (request == null) {
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "リクエストが不正です。");
-        }
-        if (!StringUtils.hasText(request.code())) {
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロールコードは必須です。");
-        }
-        if (!StringUtils.hasText(request.name())) {
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロール名は必須です。");
-        }
 
-        final var code = StringUtils.normalize(request.code());
-        if (code == null || !code.matches("^[A-Za-z0-9_]+$")) {
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロールコード形式が不正です。（英数字と_のみ）");
-        }
-    }
-
-    private void ensureCodeUnique(String code, Long excludeId) {
-
-        final var qw = new LambdaQueryWrapper<Role>()
-                .eq(Role::getCode, code);
-
-        if (excludeId != null) {
-            qw.ne(Role::getId, excludeId);
-        }
-
-        if (baseMapper.selectCount(qw) > 0) {
-            throw BizException.withDetail(ErrorCode.CONFLICT, "ロールコードは既に存在します。code=" + code);
-        }
-    }
-
-    private Status normalizeStatus(Status status) {
-        if (status == null) return Status.ENABLED; // 以前の default=1 と同等
-        final int code = status.toJson(); // JsonValue が 0/1 を返す設計
-        if (code != 0 && code != 1) {
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "status は 0/1 のみ指定可能です。");
-        }
-        return status;
-    }
 }

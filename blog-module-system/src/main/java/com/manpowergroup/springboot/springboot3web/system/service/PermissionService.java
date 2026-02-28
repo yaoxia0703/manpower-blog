@@ -2,6 +2,7 @@ package com.manpowergroup.springboot.springboot3web.system.service;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionQueryRequest;
 import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionSaveOrUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.dto.permission.PermissionStatusUpdateRequest;
@@ -26,13 +27,13 @@ public interface PermissionService extends IService<Permission> {
 
     Permission getPermissionById(Long id);
 
-    Long CreatePermission(Permission permission);
+    Long createPermission(PermissionSaveOrUpdateRequest request);
 
     void updatePermission(Long id, PermissionSaveOrUpdateRequest request);
 
     void deletePermission(Long id);
 
-    void changeStatus(Long id, PermissionStatusUpdateRequest request);
+    void changeStatus(Long id, Status status);
 
 
 }
