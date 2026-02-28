@@ -5,6 +5,7 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.ValidationErr
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -24,16 +26,24 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * 全体共通の例外ハンドラ
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Map<String, String> UNIQUE_MESSAGES = Map.of(
+            "uk_role_code", "ロールコードは既に存在しています。",
+            "uk_permission_code", "権限制御コードは既に存在しています。",
+            "uk_user_email", "メールアドレスは既に登録されています。"
+    );
     private final MessageSource messageSource;
     private final Environment env;
+
+
 
     public GlobalExceptionHandler(MessageSource messageSource, Environment env) {
         this.messageSource = messageSource;
@@ -179,6 +189,28 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * DB UNIQUE制約違反（DuplicateKey）
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    public Result<Object> handleDuplicateKey(DuplicateKeyException e) {
+
+        final String detail = e.getMostSpecificCause().getMessage();
+        final String d = detail == null ? "" : detail.toLowerCase(Locale.ROOT);
+
+        // UNIQUE_MESSAGES に一致するものがあればそのメッセージを使用、なければ共通メッセージ
+        final String msg = UNIQUE_MESSAGES.entrySet().stream()
+                .filter(entry -> d.contains(entry.getKey()))
+                .map(java.util.Map.Entry::getValue)
+                .findFirst()
+                .orElseGet(() -> i18n(ErrorCode.CONFLICT.message()));
+
+        log.warn("[traceId={}] {} | {}", MDC.get("traceId"), msg, detail, e);
+
+        return Result.error(ErrorCode.CONFLICT.code(), msg)
+                .withDetail(safeDetail(detail));
+    }
+
+    /**
      * リクエストボディの解析失敗
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -243,6 +275,9 @@ public class GlobalExceptionHandler {
         logError(msg, detail, e);
         return Result.error(413, msg).withDetail(safeDetail(detail));
     }
+
+
+
 
     /* ====================== その他例外 ====================== */
 
