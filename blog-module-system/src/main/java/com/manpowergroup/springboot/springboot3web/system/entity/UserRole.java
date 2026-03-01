@@ -3,8 +3,9 @@ package com.manpowergroup.springboot.springboot3web.system.entity;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * <p>
@@ -14,8 +15,11 @@ import lombok.Setter;
  * @author YAOXIA
  * @since 2025-12-18
  */
-@Getter
-@Setter
+@Data
+@Builder
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 @TableName("t_sys_user_role")
 public class UserRole {
 

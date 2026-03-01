@@ -55,7 +55,7 @@ public class SystemCodeGenerator {
 
         List<String> tables = (args != null && args.length > 0)
                 ? Arrays.asList(args)
-                : List.of("t_sys_role_permission");
+                : List.of("t_sys_role_menu");
 
         /* ========= 出力ファイル設定 ========= */
         Map<OutputFile, String> pathInfo = new HashMap<>();

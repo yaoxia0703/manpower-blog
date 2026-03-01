@@ -38,7 +38,9 @@ public class GlobalExceptionHandler {
     private static final Map<String, String> UNIQUE_MESSAGES = Map.of(
             "uk_role_code", "ロールコードは既に存在しています。",
             "uk_permission_code", "権限制御コードは既に存在しています。",
-            "uk_user_email", "メールアドレスは既に登録されています。"
+            "uk_user_email", "メールアドレスは既に登録されています。",
+            "uk_user_role", "ユーザーとロールの関連は既に存在しています。",
+            "uk_role_perm", "ロールと権限の関連は既に存在しています。"
     );
     private final MessageSource messageSource;
     private final Environment env;

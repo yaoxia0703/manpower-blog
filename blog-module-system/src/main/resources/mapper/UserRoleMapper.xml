@@ -16,6 +16,38 @@
     <sql id="Base_Column_List">
         id, user_id, role_id, created_at, updated_at, is_deleted
     </sql>
-    
+
+    <select id="selectAllByUserIdIncludeDeleted"
+            resultType="com.manpowergroup.springboot.springboot3web.system.entity.UserRole">
+        SELECT id, user_id, role_id, created_at, updated_at, is_deleted
+        FROM t_sys_user_role
+        WHERE user_id = #{userId}
+
+    </select>
+
+    <update id="restoreRoles">
+        UPDATE t_sys_user_role
+        SET is_deleted = 0,
+        updated_at = #{now}
+        WHERE user_id = #{userId}
+        AND is_deleted = 1
+        AND role_id IN
+        <foreach collection="roleIds" item="rid" open="(" separator="," close=")">
+            #{rid}
+        </foreach>
+
+    </update>
+    <update id="logicalDeleteRoles">
+        UPDATE t_sys_user_role
+        SET is_deleted = 1,
+        updated_at = #{now}
+        WHERE user_id = #{userId}
+        AND is_deleted = 0
+        AND role_id IN
+        <foreach collection="roleIds" item="rid" open="(" separator="," close=")">
+            #{rid}
+        </foreach>
+    </update>
+
 
 </mapper>

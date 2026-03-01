@@ -13,4 +13,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface RolePermissionService extends IService<RolePermission> {
 
+    void saveOrUpdate(Long roleId, Long[] permissionIds);
+
 }

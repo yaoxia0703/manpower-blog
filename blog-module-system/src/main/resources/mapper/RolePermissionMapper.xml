@@ -17,4 +17,34 @@
         id, role_id, permission_id, created_at, updated_at, is_deleted
     </sql>
 
+    <select id="selectAllByRoleIdIncludeDeleted"
+            resultType="com.manpowergroup.springboot.springboot3web.system.entity.RolePermission">
+
+        select id,role_id,permission_id,created_at,updated_at,is_deleted from  t_sys_role_permission
+        where role_id = #{roleId}
+    </select>
+
+    <update id="restorePermissions">
+        UPDATE t_sys_role_permission
+        SET is_deleted = 0,
+        updated_at = #{now}
+        WHERE role_id = #{roleId}
+        AND is_deleted = 1
+        AND permission_id IN
+        <foreach collection="permissionIds" item="pid" open="(" separator="," close=")">
+            #{pid}
+        </foreach>
+    </update>
+    <update id="logicalDeletePermissions">
+        UPDATE t_sys_role_permission
+        SET is_deleted = 1,
+        updated_at = #{now}
+        WHERE role_id = #{roleId}
+        AND is_deleted = 0
+        AND permission_id IN
+        <foreach collection="permissionIds" item="pid" open="(" separator="," close=")">
+            #{pid}
+        </foreach>
+    </update>
+
 </mapper>
