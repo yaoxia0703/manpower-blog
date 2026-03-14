@@ -3,10 +3,10 @@ package com.manpowergroup.springboot.springboot3web.admin;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
-import com.manpowergroup.springboot.springboot3web.system.dto.role.RoleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.system.dto.role.RoleSaveOrUpdateRequest;
-import com.manpowergroup.springboot.springboot3web.system.entity.Role;
-import com.manpowergroup.springboot.springboot3web.system.service.RoleService;
+import com.manpowergroup.springboot.springboot3web.system.application.dto.role.RoleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.system.application.dto.role.RoleSaveOrUpdateRequest;
+import com.manpowergroup.springboot.springboot3web.system.domain.model.role.Role;
+import com.manpowergroup.springboot.springboot3web.system.application.service.RoleAppService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class RoleController {
 
-    private final  RoleService roleService;
+    private final RoleAppService roleService;
 
     @PreAuthorize("hasAuthority('sys:role:list')")
     @GetMapping("/pageList")

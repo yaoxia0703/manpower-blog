@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.manpowergroup.springboot.springboot3web.system.mapper.UserRoleMapper">
+<mapper namespace="com.manpowergroup.springboot.springboot3web.system.infrastructure.mapper.user.UserRoleMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.manpowergroup.springboot.springboot3web.system.entity.UserRole">
+    <resultMap id="BaseResultMap" type="com.manpowergroup.springboot.springboot3web.system.domain.model.user.UserRole">
         <id column="id" property="id" />
         <result column="user_id" property="userId" />
         <result column="role_id" property="roleId" />
@@ -18,7 +18,7 @@
     </sql>
 
     <select id="selectAllByUserIdIncludeDeleted"
-            resultType="com.manpowergroup.springboot.springboot3web.system.entity.UserRole">
+            resultType="com.manpowergroup.springboot.springboot3web.system.domain.model.user.UserRole">
         SELECT id, user_id, role_id, created_at, updated_at, is_deleted
         FROM t_sys_user_role
         WHERE user_id = #{userId}

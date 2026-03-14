@@ -8,8 +8,8 @@ import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.framework.security.jwt.JwtTokenProvider;
 import com.manpowergroup.springboot.springboot3web.framework.security.jwt.LoginPrincipal;
-import com.manpowergroup.springboot.springboot3web.system.service.LoginService;
-import com.manpowergroup.springboot.springboot3web.system.service.UserService;
+import com.manpowergroup.springboot.springboot3web.system.application.service.LoginAppService;
+import com.manpowergroup.springboot.springboot3web.system.application.service.UserAppService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,17 +19,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/system/auth")
 @AllArgsConstructor
 @Slf4j
 public class LoginController {
 
-    private final LoginService loginService;
+    private final LoginAppService loginService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserService userService;
+    private final UserAppService userService;
 
     @PostMapping("/login")
     public Result<LoginResponse<LoginUser>> login(
