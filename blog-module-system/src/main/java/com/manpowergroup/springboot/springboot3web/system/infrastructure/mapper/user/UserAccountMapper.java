@@ -17,6 +17,13 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface UserAccountMapper extends BaseMapper<UserAccount> {
 
+    /**
+     * アカウント種別とアカウント値によりログインユーザー情報を取得する
+     *
+     * @param accountType アカウント種別
+     * @param accountValue アカウント値
+     * @return ログインユーザー情報
+     */
     LoginAccountUserDTO findLoginUserByAccountTypeAndAccountValue(
             @Param("accountType") String accountType,
             @Param("accountValue") String accountValue
