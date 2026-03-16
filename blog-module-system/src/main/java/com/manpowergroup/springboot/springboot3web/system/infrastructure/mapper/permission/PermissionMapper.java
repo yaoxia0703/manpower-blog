@@ -18,6 +18,12 @@ import java.util.List;
 @Mapper
 public interface PermissionMapper extends BaseMapper<Permission> {
 
+    /**
+     * 指定ユーザーに紐づく権限コード一覧を取得する
+     *
+     * @param userId ユーザーID
+     * @return 権限コード一覧
+     */
     List<String> selectPermissionCodesByUserId(@Param("userId") Long userId);
 
 }

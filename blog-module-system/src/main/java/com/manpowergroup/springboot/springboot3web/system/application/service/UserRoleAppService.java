@@ -13,6 +13,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserRoleAppService extends IService<UserRole> {
 
+    /**
+     * ユーザーに紐づくロール関連を保存または更新する
+     *
+     * @param userId 対象ユーザーID
+     * @param roleIds ユーザーに割り当てるロールID配列
+     */
     void saveOrUpdate(Long userId, Long[] roleIds);
 
 }

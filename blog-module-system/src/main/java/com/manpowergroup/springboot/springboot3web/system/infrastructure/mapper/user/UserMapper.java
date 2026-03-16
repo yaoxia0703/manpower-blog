@@ -16,6 +16,12 @@ import org.apache.ibatis.annotations.Param;
  */
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
+    /**
+     * 指定ユーザーIDによりログインユーザー詳細情報を取得する
+     *
+     * @param userId ユーザーID
+     * @return ログインユーザー詳細情報
+     */
     LoginUser selectLoginUserDetailByUserId(@Param("userId") Long userId);
 
 

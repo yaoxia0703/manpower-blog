@@ -20,10 +20,36 @@ import java.util.List;
 @Mapper
 public interface RolePermissionMapper extends BaseMapper<RolePermission> {
 
+    /**
+     * 指定ロールに紐づく権限関連を取得する（論理削除データを含む）
+     *
+     * @param roleId ロールID
+     * @return ロール権限関連一覧
+     */
     List<RolePermission> selectAllByRoleIdIncludeDeleted(@Param("roleId") Long roleId);
 
-    int restorePermissions(@Param("roleId") Long roleId, @Param("permissionIds") Collection<Long> permissionIds, @Param("now") LocalDateTime now);
+    /**
+     * 論理削除されたロール権限関連を復元する
+     *
+     * @param roleId ロールID
+     * @param permissionIds 権限ID一覧
+     * @param now 更新日時
+     * @return 更新件数
+     */
+    int restorePermissions(@Param("roleId") Long roleId,
+                           @Param("permissionIds") Collection<Long> permissionIds,
+                           @Param("now") LocalDateTime now);
 
-    int logicalDeletePermissions(@Param("roleId") Long roleId, @Param("permissionIds") Collection<Long> permissionIds, @Param("now") LocalDateTime now);
+    /**
+     * 指定ロールに紐づく権限関連を論理削除する
+     *
+     * @param roleId ロールID
+     * @param permissionIds 権限ID一覧
+     * @param now 更新日時
+     * @return 更新件数
+     */
+    int logicalDeletePermissions(@Param("roleId") Long roleId,
+                                 @Param("permissionIds") Collection<Long> permissionIds,
+                                 @Param("now") LocalDateTime now);
 
 }

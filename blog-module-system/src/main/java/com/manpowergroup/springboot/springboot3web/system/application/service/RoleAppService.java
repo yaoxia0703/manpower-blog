@@ -17,17 +17,52 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-12-18
  */
 public interface RoleAppService extends IService<Role> {
+    /**
+     * ロール一覧をページングで取得する
+     *
+     * @param pageRequest ページ情報
+     * @param query 検索条件
+     * @return ロール一覧（ページング）
+     */
     JoinPageResult<Role> pageRoles(PageRequest pageRequest, RoleQueryRequest query);
 
-
+    /**
+     * ロールIDによりロール情報を取得する
+     *
+     * @param id ロールID
+     * @return ロール情報
+     */
     Role getRoleById(Long id);
 
+    /**
+     * ロールを新規作成する
+     *
+     * @param request ロール作成リクエスト
+     * @return 作成されたロールID
+     */
     Long createRole(RoleSaveOrUpdateRequest request);
 
+    /**
+     * ロール情報を更新する
+     *
+     * @param id ロールID
+     * @param request 更新内容
+     */
     void updateRole(Long id, RoleSaveOrUpdateRequest request);
 
+    /**
+     * ロールを削除する
+     *
+     * @param id ロールID
+     */
     void deleteRole(Long id);
 
+    /**
+     * ロールの状態を変更する
+     *
+     * @param id ロールID
+     * @param status 状態（有効 / 無効）
+     */
     void changeStatus(Long id, Status status);
 
 }

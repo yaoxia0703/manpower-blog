@@ -20,14 +20,37 @@ import java.util.List;
 @Mapper
 public interface UserRoleMapper extends BaseMapper<UserRole> {
 
+    /**
+     * 指定ユーザーに紐づくロール関連を取得する（論理削除データを含む）
+     *
+     * @param userId ユーザーID
+     * @return ユーザーロール関連一覧
+     */
     List<UserRole> selectAllByUserIdIncludeDeleted(@Param("userId") Long userId);
 
-    int restoreRoles(@Param("userId") Long userId, @Param("roleIds") Collection<Long> roleIds, @Param("now") LocalDateTime now);
+    /**
+     * 論理削除されたユーザーロール関連を復元する
+     *
+     * @param userId ユーザーID
+     * @param roleIds ロールID一覧
+     * @param now 更新日時
+     * @return 更新件数
+     */
+    int restoreRoles(@Param("userId") Long userId,
+                     @Param("roleIds") Collection<Long> roleIds,
+                     @Param("now") LocalDateTime now);
 
+    /**
+     * 指定ユーザーに紐づくロール関連を論理削除する
+     *
+     * @param userId ユーザーID
+     * @param roleIds ロールID一覧
+     * @param now 更新日時
+     * @return 更新件数
+     */
     int logicalDeleteRoles(
             @Param("userId") Long userId,
             @Param("roleIds") Collection<Long> roleIds,
             @Param("now") LocalDateTime now
     );
-
 }

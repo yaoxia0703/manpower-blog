@@ -13,5 +13,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-12-18
  */
 public interface UserAppService extends IService<User> {
-    public LoginUser findLoginUserDetailByUserId(Long userId);
+    /**
+     * ユーザーIDによりログインユーザー詳細情報を取得する
+     *
+     * @param userId ユーザーID
+     * @return ログインユーザー詳細情報
+     */
+    LoginUser findLoginUserDetailByUserId(Long userId);
 }
