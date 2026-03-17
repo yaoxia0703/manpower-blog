@@ -14,7 +14,7 @@
         <result column="sort" property="sort" />
         <result column="icon" property="icon" />
         <result column="status" property="status" />
-        <result column="is_delete" property="isDelete" />
+        <result column="is_delete" property="isDeleted" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
     </resultMap>
@@ -23,5 +23,55 @@
     <sql id="Base_Column_List">
         id, parent_id, name, path, component, permission, type, sort, icon, status, is_delete, create_time, update_time
     </sql>
+    <select id="selectMenusByUserId"
+            resultType="com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu">
+        SELECT DISTINCT tsm.*
+        FROM t_sys_menu tsm
+                 JOIN t_sys_role_menu tsr ON tsm.id = tsr.menu_id
+                 JOIN t_sys_user_role tsur ON tsur.role_id = tsr.role_id
+        WHERE tsur.user_id = #{userId}
+          AND tsm.status = 1
+          AND tsm.is_deleted = 0
+          AND tsur.is_deleted = 0
+          AND tsr.is_deleted = 0
+        ORDER BY tsm.sort ASC, tsm.id ASC
+
+    </select>
+    <select id="existsByParentIdAndName" resultType="int">
+        SELECT COUNT(1)
+        FROM t_sys_menu
+        WHERE parent_id = #{parentId}
+          AND name = #{name}
+          AND is_delete = 0
+    </select>
+    <select id="countByParentId" resultType="int">
+        SELECT COUNT(1)
+        FROM t_sys_menu
+        WHERE parent_id = #{parentId}
+          AND is_delete = 0
+    </select>
+    <select id="countByParentIdAndNameExcludeId" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_sys_menu
+        WHERE parent_id = #{parentId}
+          AND name = #{name}
+          AND id != #{id}
+          AND is_delete = 0
+    </select>
+    <select id="countByPath" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_sys_menu
+        WHERE path = #{path}
+          AND is_delete = 0
+
+    </select>
+    <select id="countByPathExcludeId" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_sys_menu
+        WHERE path = #{path}
+          AND id != #{id}
+          AND is_delete = 0
+
+    </select>
 
 </mapper>
