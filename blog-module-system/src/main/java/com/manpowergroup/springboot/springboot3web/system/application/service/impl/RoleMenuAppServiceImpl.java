@@ -31,7 +31,7 @@ public class RoleMenuAppServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu
     public void saveRoleMenu(Long roleId, Long[] menuIds) {
 
         // 処理開始ログ
-        log.info("[saveRoleMenu] 開始 roleId={}, menuIds={}", roleId, Arrays.toString(menuIds));
+        log.info("[RoleAppMenuService#saveRoleMenu] start  roleId={}, menuIds={}", roleId, Arrays.toString(menuIds));
 
         // ロールIDが未指定の場合はエラー
         if (roleId == null) {
@@ -42,7 +42,7 @@ public class RoleMenuAppServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu
         // 既存のロールメニュー関連を削除
         // ==============================
 
-        log.info("[saveRoleMenu] 既存ロールメニュー削除 roleId={}", roleId);
+        log.info("[RoleAppMenuService#saveRoleMenu] 既存ロールメニュー削除 roleId={}", roleId);
 
         // roleId に紐づく既存のロールメニュー関連を検索条件として設定
         LambdaQueryWrapper<RoleMenu> qw = new LambdaQueryWrapper<RoleMenu>()
@@ -51,7 +51,7 @@ public class RoleMenuAppServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu
         // 該当するロールメニュー関連を削除
         baseMapper.delete(qw);
 
-        log.info("[saveRoleMenu] 既存ロールメニュー削除完了 roleId={}", roleId);
+        log.info("[RoleAppMenuService#saveRoleMenu] 既存ロールメニュー削除完了 roleId={}", roleId);
 
         // ==============================
         // menuIds のバリデーション
@@ -59,7 +59,7 @@ public class RoleMenuAppServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu
 
         // menuIds が null または空の場合は処理不可
         if (menuIds == null || menuIds.length == 0) {
-            log.warn("[saveRoleMenu] メニューIDが指定されていません roleId={}", roleId);
+            log.warn("[RoleAppMenuService#saveRoleMenu] メニューIDが指定されていません roleId={}", roleId);
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "メニューIDが指定されていません。");
         }
 
@@ -67,7 +67,7 @@ public class RoleMenuAppServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu
         // 新しいロールメニュー関連を登録
         // ==============================
 
-        log.info("[saveRoleMenu] 新規ロールメニュー登録開始 roleId={}", roleId);
+        log.info("[RoleAppMenuService#saveRoleMenu] 新規ロールメニュー登録開始 roleId={}", roleId);
 
         // menuIds をループしてロールメニュー関連を作成
         for (Long menuId : menuIds) {
@@ -83,7 +83,7 @@ public class RoleMenuAppServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu
         }
 
         // 処理完了ログ
-        log.info("[saveRoleMenu] 新規ロールメニュー登録完了 roleId={}, menuIds={}",
+        log.info("[RoleAppMenuService#saveRoleMenu] 新規ロールメニュー登録完了 roleId={}, menuIds={}",
                 roleId, Arrays.toString(menuIds));
     }
 }

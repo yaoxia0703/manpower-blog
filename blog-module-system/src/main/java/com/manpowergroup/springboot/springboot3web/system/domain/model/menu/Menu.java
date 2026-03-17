@@ -1,6 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.system.domain.model.menu;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.MenuType;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,7 +62,7 @@ public class Menu {
     /**
      * メニュー種別（1=ディレクトリ 2=メニュー 3=ボタン）
      */
-    private Byte type;
+    private MenuType type;
 
     /**
      * 表示順
@@ -82,8 +83,8 @@ public class Menu {
      * 論理削除フラグ（0=未削除 1=削除済）
      */
     @TableLogic
-    @TableField(value = "is_delete")
-    private Byte isDelete;
+    @TableField(value = "is_deleted")
+    private Byte isDeleted;
 
     /**
      * 作成日時

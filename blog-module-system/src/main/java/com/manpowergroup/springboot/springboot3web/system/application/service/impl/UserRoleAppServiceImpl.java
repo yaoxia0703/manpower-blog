@@ -28,11 +28,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserRoleAppServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleAppService {
 
-    private final UserRoleMapper userRoleMapper;
     private final UserRoleRepository userRoleRepository;
 
-    public UserRoleAppServiceImpl(UserRoleMapper userRoleMapper, UserRoleRepository userRoleRepository) {
-        this.userRoleMapper = userRoleMapper;
+    public UserRoleAppServiceImpl( UserRoleRepository userRoleRepository) {
         this.userRoleRepository = userRoleRepository;
     }
 
@@ -40,14 +38,17 @@ public class UserRoleAppServiceImpl extends ServiceImpl<UserRoleMapper, UserRole
     @Transactional
     public void saveOrUpdate(Long userId, Long[] roleIds) {
 
+        log.info("[UserRoleAppService#saveOrUpdate] start: userId={}, roleIds={}", userId, Arrays.toString(roleIds));
         // ===== 引数チェック：userId 必須 =====
         if (userId == null) {
+            log.warn("[UserRoleAppService#saveOrUpdate] failed: userId is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ユーザーIDが指定されていません。");
         }
 
         // ===== 引数チェック：roleIds 必須（null 不可）=====
         // null はパラメータ不備扱い、空配列は「全ロール解除」を意味する
         if (roleIds == null) {
+            log.warn("[UserRoleAppService#saveOrUpdate] failed: roleIds is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロールID一覧が指定されていません。");
         }
 
@@ -64,7 +65,7 @@ public class UserRoleAppServiceImpl extends ServiceImpl<UserRoleMapper, UserRole
         // 理論上、(user_id, role_id) は一意（uk_user_role）
         final Map<Long, UserRole> existingMap = existingAll.stream().collect(Collectors.toMap(UserRole::getRoleId, Function.identity(), (a, b) -> {
             // データ不整合検出ログ（通常発生しない想定）
-            log.error("[UserRole.saveOrUpdate] duplicated rows: userId={}, " +
+            log.error("[UserRoleAppService#saveOrUpdate] duplicated rows: userId={}, " +
                     "roleId={}, id1={}, del1={}, id2={}, del2={}", userId, a.getRoleId(), a.getId(), a.getIsDeleted(), b.getId(), b.getIsDeleted());
             // 先に取得されたレコードを採用
             return a;
@@ -107,13 +108,13 @@ public class UserRoleAppServiceImpl extends ServiceImpl<UserRoleMapper, UserRole
                 .filter(r -> Byte.valueOf((byte) 0).equals(r.getIsDeleted()))
                 .map(UserRole::getRoleId).filter(roleId -> !targetRoleIds.contains(roleId)).collect(Collectors.toSet());
 
-        log.info("[UserRole.saveOrUpdate] start: userId={}, targetSize={}, existingSize={}, restoreSize={}, insertSize={}, deleteSize={}", userId, targetRoleIds.size(), existingAll.size(), toRestore.size(), toInsert.size(), toDelete.size());
+        log.info("[UserRoleAppService#saveOrUpdate] start: userId={}, targetSize={}, existingSize={}, restoreSize={}, insertSize={}, deleteSize={}", userId, targetRoleIds.size(), existingAll.size(), toRestore.size(), toInsert.size(), toDelete.size());
 
         // ===== 1. 論理削除 → 復活処理 =====
         if (!toRestore.isEmpty()) {
             final int restored = userRoleRepository.restoreRoles(userId, toRestore, now);
 
-            log.info("[UserRole.saveOrUpdate] restore executed: userId={}, count={}, roleIds={}", userId, restored, toRestore);
+            log.info("[UserRoleAppService#saveOrUpdate] restore executed: userId={}, count={}, roleIds={}", userId, restored, toRestore);
         }
 
         // ===== 2. 新規INSERT処理 =====
@@ -121,7 +122,7 @@ public class UserRoleAppServiceImpl extends ServiceImpl<UserRoleMapper, UserRole
             this.saveBatch(toInsert);
 
             log.info(
-                    "[UserRole.saveOrUpdate] insert executed: userId={}, count={}, roleIds={}",
+                    "[UserRoleAppService#saveOrUpdate] insert executed: userId={}, count={}, roleIds={}",
                     userId,
                     toInsert.size(),
                     toInsert.stream().map(UserRole::getRoleId).collect(Collectors.toList())
@@ -132,9 +133,9 @@ public class UserRoleAppServiceImpl extends ServiceImpl<UserRoleMapper, UserRole
         if (!toDelete.isEmpty()) {
             final int deleted = userRoleRepository.logicalDeleteRoles(userId, toDelete, now);
 
-            log.info("[UserRole.saveOrUpdate] logical delete executed: userId={}, count={}, roleIds={}", userId, deleted, toDelete);
+            log.info("[UserRoleAppService#saveOrUpdate] logical delete executed: userId={}, count={}, roleIds={}", userId, deleted, toDelete);
         }
 
-        log.info("[UserRole.saveOrUpdate] completed: userId={}", userId);
+        log.info("[UserRoleAppService#saveOrUpdate] completed: userId={}", userId);
     }
 }

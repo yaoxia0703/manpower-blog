@@ -86,19 +86,21 @@ public class PermissionAppServiceImpl extends ServiceImpl<PermissionMapper, Perm
     @Override
     @Transactional
     public Long createPermission(PermissionSaveOrUpdateRequest request) {
+        log.info("[PermissionAppService#createPermission] start: request={}", request);
         final var entity = PermissionAssembler.toNewEntity(request);
         baseMapper.insert(entity);
-        log.info("権限を登録しました。entity={}", entity);
+        log.info("[PermissionAppService#createPermission] success: entity={}", entity);
         return entity.getId();
     }
 
     @Override
     @Transactional
     public void updatePermission(Long id, PermissionSaveOrUpdateRequest request) {
+        log.info("[PermissionAppService#updatePermission] start id={}, request={}", id, request);
         final var existing = getPermissionById(id);
         PermissionAssembler.applyToExisting(request, existing);
         baseMapper.updateById(existing);
-        log.info("権限を更新しました。entity={}", existing);
+        log.info("[PermissionAppService#updatePermission] success entity={}", existing);
 
     }
 
@@ -118,7 +120,7 @@ public class PermissionAppServiceImpl extends ServiceImpl<PermissionMapper, Perm
         }
 
         log.info(
-                "権限を削除しました。id={}, code={}, name={}",
+                "[PermissionAppService#deletePermission] success : id={}, code={}, name={}",
                 existing.getId(),
                 existing.getCode(),
                 existing.getName()
@@ -149,7 +151,7 @@ public class PermissionAppServiceImpl extends ServiceImpl<PermissionMapper, Perm
         existing.setStatus(status);
         baseMapper.updateById(existing);
 
-        log.info("権限のステータスを変更しました。id={}, code={}, name={}, {} -> {}",
+        log.info("[PermissionAppService#changeStatus] success id={}, code={}, name={}, {} -> {}",
                 existing.getId(),
                 existing.getCode(),
                 existing.getName(),

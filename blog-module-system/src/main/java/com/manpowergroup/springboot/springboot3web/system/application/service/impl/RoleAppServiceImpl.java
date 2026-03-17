@@ -80,6 +80,7 @@ public class RoleAppServiceImpl extends ServiceImpl<RoleMapper, Role> implements
     @Override
     @Transactional
     public Long createRole(RoleSaveOrUpdateRequest request) {
+        log.info("[RoleAppService#createRole] start request={}", request);
 
         final var code = StringUtils.normalize(request.code()).toUpperCase(Locale.ROOT);
         final var name = StringUtils.normalize(request.name());
@@ -94,9 +95,10 @@ public class RoleAppServiceImpl extends ServiceImpl<RoleMapper, Role> implements
                 .build();
 
         // UNIQUE違反は GlobalExceptionHandler で一括処理
+        log.info("[RoleAppService#createRole] request={}", request);
         baseMapper.insert(role);
 
-        log.info("ロールを登録しました。entity={}", role);
+        log.info("[RoleAppService#createRole] success: entity={}", role);
 
         return role.getId();
     }

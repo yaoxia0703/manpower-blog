@@ -36,6 +36,7 @@ public class RolePermissionAppServiceImpl extends ServiceImpl<RolePermissionMapp
     @Override
     @Transactional
     public void saveOrUpdate(Long roleId, Long[] permissionIds) {
+        log.info("[RolePermissionAppService#saveOrUpdate] start: roleId={}, permissionIds={}", roleId, Arrays.toString(permissionIds));
 
         // ===== 引数チェック：roleId 必須 =====
         if (roleId == null) {
@@ -66,7 +67,7 @@ public class RolePermissionAppServiceImpl extends ServiceImpl<RolePermissionMapp
                         Function.identity(),
                         (e1, e2) -> {
                             log.error(
-                                    "[RolePermission.saveOrUpdate] duplicated rows detected: roleId={}, permissionId={}, id1={}, del1={}, id2={}, del2={}",
+                                    "[RolePermissionAppService#saveOrUpdate] duplicated rows detected: roleId={}, permissionId={}, id1={}, del1={}, id2={}, del2={}",
                                     e1.getRoleId(),
                                     e1.getPermissionId(),
                                     e1.getId(),
@@ -111,19 +112,19 @@ public class RolePermissionAppServiceImpl extends ServiceImpl<RolePermissionMapp
                 .filter(permissionId -> !targetPermissionIds.contains(permissionId))
                 .collect(Collectors.toSet());
 
-        log.info("[RolePermission.saveOrUpdate] start: roleId={}, targetSize={}, existingSize={}, restoreSize={}, insertSize={}, deleteSize={}",
+        log.info("[RolePermissionAppService#saveOrUpdate] start: roleId={}, targetSize={}, existingSize={}, restoreSize={}, insertSize={}, deleteSize={}",
                 roleId, targetPermissionIds.size(), existingAll.size(), toRestore.size(), toInsert.size(), toDelete.size());
 
         // 1) 復活（is_deleted=1 -> 0）
         if (!toRestore.isEmpty()) {
             final int restored = rolePermissionRepository.restorePermissions(roleId, toRestore, now);
-            log.info("[RolePermission.saveOrUpdate] restore executed: roleId={}, count={}, permissionIds={}", roleId, restored, toRestore);
+            log.info("[RolePermissionAppService#saveOrUpdate] restore executed: roleId={}, count={}, permissionIds={}", roleId, restored, toRestore);
         }
 
         // 2) 新規INSERT
         if (!toInsert.isEmpty()) {
             this.saveBatch(toInsert);
-            log.info("[RolePermission.saveOrUpdate] insert executed: roleId={}, count={}, permissionIds={}",
+            log.info("[RolePermissionAppService#saveOrUpdate] insert executed: roleId={}, count={}, permissionIds={}",
                     roleId,
                     toInsert.size(),
                     toInsert.stream().map(RolePermission::getPermissionId).collect(Collectors.toList())
@@ -133,9 +134,9 @@ public class RolePermissionAppServiceImpl extends ServiceImpl<RolePermissionMapp
         // 3) 論理削除（is_deleted=0 -> 1）
         if (!toDelete.isEmpty()) {
             final int deleted = rolePermissionRepository.logicalDeletePermissions(roleId, toDelete, now);
-            log.info("[RolePermission.saveOrUpdate] logical delete executed: roleId={}, count={}, permissionIds={}", roleId, deleted, toDelete);
+            log.info("[RolePermissionAppService#saveOrUpdate] logical delete executed: roleId={}, count={}, permissionIds={}", roleId, deleted, toDelete);
         }
 
-        log.info("[RolePermission.saveOrUpdate] completed: roleId={}", roleId);
+        log.info("[RolePermissionAppService#saveOrUpdate] completed: roleId={}", roleId);
     }
 }
