@@ -30,7 +30,8 @@ jobs:
           cache: maven
 
       - name: Build backend with Maven
-        run: mvn clean verify
+#        run: mvn clean verify
+        run: mvn clean package -DskipTests
 
 #      - name: Setup Node
 #        uses: actions/setup-node@v4

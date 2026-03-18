@@ -40,5 +40,5 @@ logs/
 
 
 ### Spring Boot local dev ###
-application-dev.yml
+**/application-dev.yml
 
