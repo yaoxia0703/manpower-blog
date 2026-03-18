@@ -1,5 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.system.application.vo;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.MenuType;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -28,15 +30,17 @@ public class MenuTreeVo {
     @Schema(description = "アイコン")
     private String icon;
 
-    @Schema(description = "メニュー種別（1=ディレクトリ、2=メニュー、3=ボタン）")
-    private Integer type;
+    @Schema(description = "メニュー種別（1=ディレクトリ、2=メニュー、3=ボタン）", example = "1")
+    private MenuType type;
 
     @Schema(description = "表示順")
     private Integer sort;
 
-    @Schema(description = "状態")
-    private Integer status;
+    @Schema(description = "状態（0=無効、1=有効）", example = "1")
+    private Status status;
 
     @Schema(description = "子メニュー")
     private List<MenuTreeVo> children = new ArrayList<>();
+
+
 }
