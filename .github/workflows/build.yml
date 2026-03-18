@@ -23,7 +23,7 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build
+      - name: Build backend with Maven
         run: mvn clean package -DskipTests
 
 #      - name: Setup Node
