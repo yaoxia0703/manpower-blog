@@ -62,6 +62,7 @@ public final class MenuAssembler {
      *
      * @param menu Menu Entity 変換元のEntity
      * @return MenuTreeVo 変換後のVO
+     *
      */
     public static MenuTreeVo toTreeVo(Menu menu) {
         MenuTreeVo vo = new MenuTreeVo();
