@@ -1,6 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.system.application.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
@@ -154,19 +155,20 @@ public class RoleAppServiceImpl extends ServiceImpl<RoleMapper, Role> implements
     @Transactional
     public void changeStatus(Long id, Status status) {
         if (id == null) {
+            log.warn("[RoleAppService#changeStatus]: roleId is null roleId={}, status={}", id, status);
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ロールIDが指定されていません。");
+        }
+        if (status == null) {
+            log.warn("[RoleAppService#changeStatus]: status is null roleId={}, status={}", id, status);
+            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "状態が指定されていません。");
         }
 
         final var role = getRoleById(id);
-
-
         final var oldStatus = role.getStatus();
         if (oldStatus == status) {
             return;
         }
-
-        role.setStatus(status);
-        baseMapper.updateById(role);
+        baseMapper.update(null, Wrappers.<Role>lambdaUpdate().set(Role::getStatus, status).eq(Role::getId, id));
 
         log.info(
                 "ROLE_STATUS_CHANGED id={}, code={}, oldStatus={}, newStatus={}",
