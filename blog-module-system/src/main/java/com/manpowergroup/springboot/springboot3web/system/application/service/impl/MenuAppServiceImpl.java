@@ -1,6 +1,5 @@
 package com.manpowergroup.springboot.springboot3web.system.application.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
@@ -8,6 +7,7 @@ import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizExce
 import com.manpowergroup.springboot.springboot3web.blog.common.util.StringUtils;
 import com.manpowergroup.springboot.springboot3web.system.application.assembler.MenuAssembler;
 import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuSaveOrUpdateRequest;
+import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuStatusUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 import com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu;
 import com.manpowergroup.springboot.springboot3web.system.domain.model.role.RoleMenu;
@@ -245,13 +245,13 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
 
     @Override
     @Transactional
-    public void changeStatus(Long id, Status status) {
-        log.info("[MenuAppService#changeStatus] start: id={}, status={}", id, status);
+    public void changeStatus(Long id, MenuStatusUpdateRequest request) {
+        log.info("[MenuAppService#changeStatus] start: id={}, status={}", id, request.status());
         if (id == null) {
             log.warn("[MenuAppService#changeStatus] id is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "メニューIDが指定されていません");
         }
-        if (status == null) {
+        if (request.status() == null) {
             log.warn("[MenuAppService#changeStatus] status is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ステータスが指定されていません");
         }
@@ -261,17 +261,17 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
             throw BizException.withDetail(ErrorCode.NOT_FOUND, "メニューが存在しません");
         }
         final var oldStatus = menu.getStatus();
-        if (oldStatus == status) {
-            log.info("[MenuAppService#changeStatus] status is the same, no change needed: id={}, status={}", id, status);
+        if (oldStatus == request.status()) {
+            log.info("[MenuAppService#changeStatus] status is the same, no change needed: id={}, status={}", id, request.status());
             return;
         }
         baseMapper.update(
                 null,
                 Wrappers.<Menu>lambdaUpdate()
-                        .set(Menu::getStatus, status)
+                        .set(Menu::getStatus, request.status())
                         .eq(Menu::getId, id)
         );
-        log.info("[MenuAppService#changeStatus] status changed successfully: id={}, oldStatus={}, newStatus={}", id, oldStatus, status);
+        log.info("[MenuAppService#changeStatus] status changed successfully: id={}, oldStatus={}, newStatus={}", id, oldStatus, request.status());
     }
 
     /**

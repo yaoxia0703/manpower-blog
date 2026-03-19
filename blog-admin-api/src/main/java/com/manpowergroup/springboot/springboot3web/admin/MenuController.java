@@ -3,9 +3,11 @@ package com.manpowergroup.springboot.springboot3web.admin;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
+import com.manpowergroup.springboot.springboot3web.system.application.assembler.MenuAssembler;
 import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuSaveOrUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuStatusUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.application.service.MenuAppService;
+import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuDetailVo;
 import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 import com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu;
 import jakarta.validation.Valid;
@@ -36,13 +38,14 @@ public class MenuController {
 
     @PreAuthorize("hasAuthority('sys:menu:detail')")
     @GetMapping("/{id}")
-    public Result<Menu> detail(@PathVariable @NotNull(message = "メニューIDは必須です") Long id) {
+    public Result<MenuDetailVo> detail(@PathVariable @NotNull(message = "メニューIDは必須です") Long id) {
         log.info("[MenuController#detail] request received: id={}", id);
         Menu menu = menuAppService.getById(id);
+        MenuDetailVo vo = MenuAssembler.toDetailVo(menu);
         if (menu == null) {
             throw BizException.withDetail(ErrorCode.NOT_FOUND, "メニューが存在しません");
         }
-        return Result.ok(menu);
+        return Result.ok(vo);
     }
 
     @PreAuthorize("hasAuthority('sys:menu:create')")
@@ -60,7 +63,7 @@ public class MenuController {
     ) {
         log.info("[MenuController#update] request received: id={}, request={}", id, request);
         menuAppService.updateMenu(id, request);
-        return Result.ok(null);
+        return Result.ok();
     }
 
     @PreAuthorize("hasAuthority('sys:menu:delete')")
@@ -68,7 +71,7 @@ public class MenuController {
     public Result<Void> delete(@PathVariable @NotNull(message = "メニューIDは必須です") Long id) {
         log.info("[MenuController#delete] request received: id={}", id);
         menuAppService.deleteMenu(id);
-        return Result.ok(null);
+        return Result.ok();
     }
 
     @PreAuthorize("hasAuthority('sys:menu:changeStatus')")
@@ -78,7 +81,7 @@ public class MenuController {
             @RequestBody @Valid MenuStatusUpdateRequest request
     ) {
         log.info("[MenuController#changeStatus] request received: id={}, status={}", id, request.status());
-        menuAppService.changeStatus(id, request.status());
-        return Result.ok(null);
+        menuAppService.changeStatus(id, request);
+        return Result.ok();
     }
 }

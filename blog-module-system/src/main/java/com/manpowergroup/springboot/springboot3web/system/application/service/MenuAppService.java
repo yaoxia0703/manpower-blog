@@ -2,6 +2,7 @@ package com.manpowergroup.springboot.springboot3web.system.application.service;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuSaveOrUpdateRequest;
+import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuStatusUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 import com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -62,7 +63,7 @@ public interface MenuAppService extends IService<Menu> {
      * @param id メニューID
      * @param status 新しい状態
      */
-    void changeStatus(Long id, Status status);
+    void changeStatus(Long id, MenuStatusUpdateRequest status);
 
 
 
