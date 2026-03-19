@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.manpowergroup.springboot.springboot3web.content.domain.model.Article;
 import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleQueryRequest;
 import com.manpowergroup.springboot.springboot3web.content.application.vo.ArticleVo;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 /**
  * 記事 Mapper インターフェース
  */
+@Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
 
     /**
