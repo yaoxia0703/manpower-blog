@@ -51,7 +51,13 @@ public class Result<T> {
         r.setTimestamp(now());
         return r;
     }
-
+    public static Result<Void> ok() {
+        Result<Void> r = new Result<>();
+        r.setCode(200);
+        r.setMessage("success.ok");
+        r.setTimestamp(now());
+        return r;
+    }
 
 
     public static <T> Result<T> ok(T data) {

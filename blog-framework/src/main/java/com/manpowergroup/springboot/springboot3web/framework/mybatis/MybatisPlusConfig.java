@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@MapperScan({"com.manpowergroup.springboot.springboot3web.system.infrastructure.mapper",
-        "com.manpowergroup.springboot.springboot3web.*.mapper"})
-
+@MapperScan({
+        "com.manpowergroup.springboot.springboot3web.system.infrastructure.mapper",
+        "com.manpowergroup.springboot.springboot3web.content.infrastructure.mapper"
+})
 public class MybatisPlusConfig {
 
     @Bean

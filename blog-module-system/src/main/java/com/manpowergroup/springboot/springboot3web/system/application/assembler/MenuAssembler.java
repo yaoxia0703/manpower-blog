@@ -1,6 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.system.application.assembler;
 
 import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuSaveOrUpdateRequest;
+import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuDetailVo;
 import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 import com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu;
 
@@ -76,5 +77,28 @@ public final class MenuAssembler {
         vo.setSort(menu.getSort());
         vo.setStatus(menu.getStatus());
         return vo;
+    }
+
+    /**
+     * Entity -> DetailVo
+     *
+     * @param menu Menu Entity 変換元のEntity
+     * @return MenuDetailVo 変換後のVO
+     */
+    public static MenuDetailVo toDetailVo(Menu menu) {
+        if (menu == null) {
+            return null;
+        }
+
+        return new MenuDetailVo(
+                menu.getId(),
+                menu.getParentId(),
+                menu.getName(),
+                menu.getPath(),
+                menu.getComponent(),
+                menu.getType(),
+                menu.getSort(),
+                menu.getStatus()
+        );
     }
 }
