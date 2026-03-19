@@ -10,11 +10,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class MybatisArticleRepository implements ArticleRepository {
+public class MybatisArticleRepositoryImpl implements ArticleRepository {
 
     private final ArticleMapper articleMapper;
 
-    public MybatisArticleRepository(ArticleMapper articleMapper) {
+
+    public MybatisArticleRepositoryImpl(ArticleMapper articleMapper) {
         this.articleMapper = articleMapper;
     }
 
