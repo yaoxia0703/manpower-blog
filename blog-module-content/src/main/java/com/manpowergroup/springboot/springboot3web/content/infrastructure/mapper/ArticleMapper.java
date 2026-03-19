@@ -1,9 +1,9 @@
-package com.manpowergroup.springboot.springboot3web.content.mapper;
+package com.manpowergroup.springboot.springboot3web.content.infrastructure.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.manpowergroup.springboot.springboot3web.content.dto.ArticleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.content.entity.Article;
-import com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo;
+import com.manpowergroup.springboot.springboot3web.content.domain.model.Article;
+import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.application.vo.ArticleVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -34,5 +34,4 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return 件数
      */
     Long countJoin(@Param("req") ArticleQueryRequest request);
-
 }

@@ -1,17 +1,15 @@
-package com.manpowergroup.springboot.springboot3web.content.service;
+package com.manpowergroup.springboot.springboot3web.content.application.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
-import com.manpowergroup.springboot.springboot3web.content.dto.ArticleCreateReq;
-import com.manpowergroup.springboot.springboot3web.content.dto.ArticleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.content.dto.ArticleUpdateReq;
-import com.manpowergroup.springboot.springboot3web.content.entity.Article;
-import com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo;
+import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleCreateReq;
+import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleUpdateReq;
+import com.manpowergroup.springboot.springboot3web.content.application.vo.ArticleVo;
 
 /**
  * 記事サービスインターフェース
  */
-public interface ArticleService extends IService<Article> {
+public interface ArticleService {
 
     /**
      * 記事一覧をページング形式で取得する

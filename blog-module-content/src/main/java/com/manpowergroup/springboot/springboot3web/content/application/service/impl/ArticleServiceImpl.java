@@ -1,17 +1,15 @@
-package com.manpowergroup.springboot.springboot3web.content.service.impl;
+package com.manpowergroup.springboot.springboot3web.content.application.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.JoinPageResult;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
-import com.manpowergroup.springboot.springboot3web.content.dto.ArticleCreateReq;
-import com.manpowergroup.springboot.springboot3web.content.dto.ArticleQueryRequest;
-import com.manpowergroup.springboot.springboot3web.content.dto.ArticleUpdateReq;
-import com.manpowergroup.springboot.springboot3web.content.entity.Article;
-import com.manpowergroup.springboot.springboot3web.content.mapper.ArticleMapper;
-import com.manpowergroup.springboot.springboot3web.content.service.ArticleService;
-import com.manpowergroup.springboot.springboot3web.content.vo.ArticleVo;
-import lombok.RequiredArgsConstructor;
+import com.manpowergroup.springboot.springboot3web.content.domain.model.Article;
+import com.manpowergroup.springboot.springboot3web.content.domain.repository.ArticleRepository;
+import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleCreateReq;
+import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleQueryRequest;
+import com.manpowergroup.springboot.springboot3web.content.application.dto.ArticleUpdateReq;
+import com.manpowergroup.springboot.springboot3web.content.application.service.ArticleService;
+import com.manpowergroup.springboot.springboot3web.content.application.vo.ArticleVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -19,31 +17,33 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static com.manpowergroup.springboot.springboot3web.blog.common.util.ServiceHelper.*;
+import static com.manpowergroup.springboot.springboot3web.blog.common.util.ServiceHelper.safePageNum;
+import static com.manpowergroup.springboot.springboot3web.blog.common.util.ServiceHelper.safePageSize;
 
 /**
  * 記事サービス実装クラス
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
-        implements ArticleService {
+public class ArticleServiceImpl implements ArticleService {
+
+    private final ArticleRepository articleRepository;
+
+    public ArticleServiceImpl(ArticleRepository articleRepository) {
+        this.articleRepository = articleRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)
     public JoinPageResult<ArticleVo> queryArticlePageVo(ArticleQueryRequest request) {
 
-        // ページングパラメータの補正
         var p = safePageNum(request.getPageNum());
         var s = safePageSize(request.getPageSize());
         var offset = (p - 1) * s;
 
-        // 一覧データおよび総件数の取得
-        var records = this.baseMapper.selectPageVo(request, offset, s);
-        var total = this.baseMapper.countJoin(request);
+        var records = articleRepository.selectPageVo(request, offset, s);
+        var total = articleRepository.countJoin(request);
 
-        // ページング結果を返却
         return JoinPageResult.of(records, total, p, s);
     }
 
@@ -52,7 +52,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     public ArticleVo getArticleVoById(Long id) {
 
         var article = Optional.ofNullable(id)
-                .map(this.baseMapper::selectById)
+                .map(articleRepository::findById)
                 .orElseThrow(() -> new BizException(ErrorCode.NOT_FOUND));
 
         ArticleVo vo = new ArticleVo();
@@ -70,7 +70,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         Article article = new Article();
         BeanUtils.copyProperties(safeReq, article);
 
-        boolean saved = this.save(article);
+        boolean saved = articleRepository.save(article);
         if (!saved) {
             throw new BizException(ErrorCode.SERVER_ERROR);
         }
@@ -87,7 +87,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         Article article = new Article();
         BeanUtils.copyProperties(safeReq, article);
 
-        boolean updated = this.updateById(article);
+        boolean updated = articleRepository.updateById(article);
         if (!updated) {
             throw new BizException(ErrorCode.SERVER_ERROR);
         }
@@ -101,7 +101,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         Optional.ofNullable(id)
                 .orElseThrow(() -> new BizException(ErrorCode.BAD_REQUEST));
 
-        boolean deleted = this.removeById(id);
+        boolean deleted = articleRepository.removeById(id);
         if (!deleted) {
             throw new BizException(ErrorCode.SERVER_ERROR);
         }

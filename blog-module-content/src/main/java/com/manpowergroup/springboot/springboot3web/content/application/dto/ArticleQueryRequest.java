@@ -1,4 +1,4 @@
-package com.manpowergroup.springboot.springboot3web.content.dto;
+package com.manpowergroup.springboot.springboot3web.content.application.dto;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.PageRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
