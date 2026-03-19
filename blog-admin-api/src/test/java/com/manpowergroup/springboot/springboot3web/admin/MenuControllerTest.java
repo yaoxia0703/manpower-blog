@@ -3,9 +3,11 @@ package com.manpowergroup.springboot.springboot3web.admin;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.framework.handler.GlobalExceptionHandler;
+import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuSaveOrUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.application.service.MenuAppService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,8 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -89,6 +94,13 @@ class MenuControllerTest {
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("success.ok"))
                 .andExpect(jsonPath("$.data").value(100L));
+
+        ArgumentCaptor<MenuSaveOrUpdateRequest> requestCaptor = ArgumentCaptor.forClass(MenuSaveOrUpdateRequest.class);
+        verify(menuAppService).createMenu(requestCaptor.capture());
+        MenuSaveOrUpdateRequest capturedRequest = requestCaptor.getValue();
+        assertThat(capturedRequest.name()).isEqualTo("メニュー管理");
+        assertThat(capturedRequest.path()).isEqualTo("/system/menu");
+        assertThat(capturedRequest.permission()).isEqualTo("sys:menu:list");
     }
 
     @Test
@@ -101,6 +113,8 @@ class MenuControllerTest {
                 .andExpect(jsonPath("$.message").value("error.validation"))
                 .andExpect(jsonPath("$.data.errors[?(@.field=='name')]").exists())
                 .andExpect(jsonPath("$.data.errors[?(@.field=='status')]").exists());
+
+        verify(menuAppService, never()).createMenu(any());
     }
 
     @Test
@@ -116,5 +130,7 @@ class MenuControllerTest {
                 .andExpect(jsonPath("$.code").value(500))
                 .andExpect(jsonPath("$.message").value("error.server"))
                 .andExpect(jsonPath("$.detail").value("メニュー作成に失敗しました"));
+
+        verify(menuAppService).createMenu(any());
     }
 }
