@@ -19,7 +19,6 @@
   - 管理コンソール（RBAC 前提）
   - 公開ブログ UI
 
-補足（中文）: 当前仓库主要提供后端服务，前端（Vue3 + Element Plus）建议以独立工程方式接入。
 
 ## 3. 技術スタック一覧
 ### バックエンド
@@ -132,8 +131,6 @@ manpower-blog/
 - バックエンド接続先
   - 管理 API: `blog-admin-api` が公開するエンドポイント
   - 公開 API: `blog-portal-api` が公開するエンドポイント
-
-補足（English）: Frontend codebase should be maintained independently and integrated via REST APIs.
 
 ## 7. 設計思想
 
