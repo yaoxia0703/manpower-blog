@@ -24,16 +24,23 @@
         id, parent_id, name, path, component, permission, type, sort, icon, status, is_delete, create_time, update_time
     </sql>
     <select id="selectMenusByUserId"
-            resultType="com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu">
-        SELECT DISTINCT tsm.*
+            resultType="com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo">
+
+        SELECT tsm.*
         FROM t_sys_menu tsm
-                 JOIN t_sys_role_menu tsr ON tsm.id = tsr.menu_id
-                 JOIN t_sys_user_role tsur ON tsur.role_id = tsr.role_id
-        WHERE tsur.user_id = #{userId}
-          AND tsm.status = 1
+        WHERE tsm.status = 1
           AND tsm.is_deleted = 0
-          AND tsur.is_deleted = 0
-          AND tsr.is_deleted = 0
+          AND EXISTS (
+            SELECT 1
+            FROM t_sys_role_menu tsr
+                     JOIN t_sys_user_role tsur
+                          ON tsur.role_id = tsr.role_id
+            WHERE tsr.menu_id = tsm.id
+              AND tsur.user_id = #{userId}
+              AND tsur.is_deleted = 0
+              AND tsr.is_deleted = 0
+              AND tsm.type IN (1,2)
+        )
         ORDER BY tsm.sort ASC, tsm.id ASC
 
     </select>

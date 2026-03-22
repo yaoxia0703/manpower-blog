@@ -1,6 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.system.domain.repository;
 
-import com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu;
+import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public interface MenuRepository {
      * @param userId ユーザID
      * @return ユーザIDに基づいて選択されたメニューのリスト
      */
-    List<Menu> selectMenusByUserId(Long userId);
+    List<MenuTreeVo> selectMenusByUserId(Long userId);
 
     /**
      * 同一階層におけるメニュー名称の存在有無を取得する

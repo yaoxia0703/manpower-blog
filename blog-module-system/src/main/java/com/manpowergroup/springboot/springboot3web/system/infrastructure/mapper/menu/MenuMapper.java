@@ -1,5 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.system.infrastructure.mapper.menu;
 
+import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 import com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -23,7 +24,7 @@ public interface MenuMapper extends BaseMapper<Menu> {
      * @param  userId ユーザID
      * @return ユーザIDに基づいて選択されたメニューのリスト
      */
-    List<Menu> selectMenusByUserId(@Param("userId") Long userId);
+    List<MenuTreeVo> selectMenusByUserId(@Param("userId") Long userId);
 
     /**
      * 同一階層におけるメニュー名称の存在有無を取得する

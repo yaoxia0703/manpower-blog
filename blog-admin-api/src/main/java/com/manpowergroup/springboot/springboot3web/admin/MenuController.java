@@ -1,6 +1,7 @@
 package com.manpowergroup.springboot.springboot3web.admin;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.system.application.assembler.MenuAssembler;
@@ -81,7 +82,7 @@ public class MenuController {
             @RequestBody @Valid MenuStatusUpdateRequest request
     ) {
         log.info("[MenuController#changeStatus] request received: id={}, status={}", id, request.status());
-        menuAppService.changeStatus(id, request);
+        menuAppService.changeMenuStatus(id, request);
         return Result.ok();
     }
 }

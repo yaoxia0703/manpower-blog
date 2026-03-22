@@ -1,6 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.system.infrastructure.repository;
 
-import com.manpowergroup.springboot.springboot3web.system.domain.model.menu.Menu;
+import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 import com.manpowergroup.springboot.springboot3web.system.domain.repository.MenuRepository;
 import com.manpowergroup.springboot.springboot3web.system.infrastructure.mapper.menu.MenuMapper;
 import org.springframework.stereotype.Repository;
@@ -16,7 +16,7 @@ public class MenuRepositoryImpl  implements MenuRepository {
     }
 
     @Override
-    public List<Menu> selectMenusByUserId(Long userId) {
+    public List<MenuTreeVo> selectMenusByUserId(Long userId) {
         return menuMapper.selectMenusByUserId(userId);
     }
 

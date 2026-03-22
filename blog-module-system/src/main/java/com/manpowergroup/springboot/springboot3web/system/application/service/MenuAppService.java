@@ -1,6 +1,5 @@
 package com.manpowergroup.springboot.springboot3web.system.application.service;
 
-import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuSaveOrUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.application.dto.menu.MenuStatusUpdateRequest;
 import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
@@ -32,7 +31,7 @@ public interface MenuAppService extends IService<Menu> {
      * @param userId ユーザID
      * @return メニューのTree構造のリスト
      */
-    List<Menu> selectMenusByUserId(Long userId);
+    List<MenuTreeVo> selectMenusByUserId(Long userId);
 
     /**
      * メニューを新規作成する
@@ -45,10 +44,10 @@ public interface MenuAppService extends IService<Menu> {
     /**
      * メニュー情報を更新する
      *
-     * @param id メニューID
+     * @param id      メニューID
      * @param request 更新内容
      */
-    void updateMenu(Long id, MenuSaveOrUpdateRequest  request);
+    void updateMenu(Long id, MenuSaveOrUpdateRequest request);
 
     /**
      * メニューを削除する
@@ -60,11 +59,10 @@ public interface MenuAppService extends IService<Menu> {
     /**
      * メニューの状態を変更する
      *
-     * @param id メニューID
+     * @param id     メニューID
      * @param status 新しい状態
      */
-    void changeStatus(Long id, MenuStatusUpdateRequest status);
-
+    void changeMenuStatus(Long id, MenuStatusUpdateRequest status);
 
 
 }
