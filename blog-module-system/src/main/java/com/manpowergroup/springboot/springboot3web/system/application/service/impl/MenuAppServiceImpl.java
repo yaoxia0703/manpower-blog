@@ -2,6 +2,7 @@ package com.manpowergroup.springboot.springboot3web.system.application.service.i
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.MenuType;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.blog.common.util.StringUtils;
@@ -71,7 +72,7 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
     }
 
     @Override
-    public List<Menu> selectMenusByUserId(Long userId) {
+    public List<MenuTreeVo> selectMenusByUserId(Long userId) {
         if (userId == null) {
             log.warn("[MenuAppService#selectMenusByUserId] userId is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ユーザーIDが指定されていません");
@@ -84,7 +85,7 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
     public Long createMenu(MenuSaveOrUpdateRequest request) {
         log.info("[MenuAppService#createMenu] start: request={}", request);
 
-        // 1. 親メニュー存在チェック（0はトップ）
+        // 親メニュー存在チェック（Service責務）
         if (request.parentId() != 0) {
             final var parent = baseMapper.selectById(request.parentId());
             if (parent == null) {
@@ -93,33 +94,26 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
             }
         }
 
-        // 2. type別バリデーション
-        validateByType(request);
+        // Entity生成
+        final var entity = MenuAssembler.toNewEntity(request);
 
-        // 3. 同階層 name 重複チェック
-        final var count = menuRepository.existsByParentIdAndName(
+        // 種別ルールチェック（Domain）
+        entity.validateByType();
+
+        // 同一階層の名称重複チェック（DB→Domain）
+        final var nameExists = menuRepository.existsByParentIdAndName(
                 request.parentId(),
                 request.name()
         );
-        if (count > 0) {
-            log.warn("[MenuAppService#createMenu] duplicate name parentId={}, name={}",
-                    request.parentId(), request.name());
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "同一階層に同名メニューが存在します");
-        }
+        entity.validateDuplicateName(nameExists > 0);
 
-        // 4. path 重複チェック
+        // path重複チェック（DB→Domain）
         if (StringUtils.hasText(request.path())) {
             final var pathCount = menuRepository.countByPath(request.path());
-            if (pathCount > 0) {
-                log.warn("[MenuAppService#createMenu] duplicate path path={}", request.path());
-                throw BizException.withDetail(ErrorCode.BAD_REQUEST, "path が既に存在します");
-            }
+            entity.validateDuplicatePath(pathCount > 0);
         }
 
-        // 5. entity変換
-        final var entity = MenuAssembler.toNewEntity(request);
-
-        // 6. 保存
+        // 保存
         baseMapper.insert(entity);
 
         log.info("[MenuAppService#createMenu] success: id={}", entity.getId());
@@ -132,20 +126,21 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
     public void updateMenu(Long id, MenuSaveOrUpdateRequest request) {
         log.info("[MenuAppService#updateMenu] start: id={}, request={}", id, request);
 
-        // 1. 存在チェック
+        // 既存チェック
         final var existing = baseMapper.selectById(id);
         if (existing == null) {
             log.warn("[MenuAppService#updateMenu] not found existing={}", id);
             throw BizException.withDetail(ErrorCode.NOT_FOUND, "メニューが存在しません");
         }
+        final MenuType oldType = existing.getType();
 
-        // 2. 自身を親に設定禁止
-        if (request.parentId().equals(id)) {
-            log.warn("[MenuAppService#updateMenu] invalid parentId: parentId={} equals id={}", request.parentId(), id);
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "自身を親に設定できません");
-        }
+        // Entity更新
+        MenuAssembler.applyToExisting(request, existing);
 
-        // 3. 親メニュー存在チェック
+        // 自身を親に設定禁止（Domain）
+        existing.validateNotSelfParent(id);
+
+        // 親メニュー存在チェック（Service）
         if (request.parentId() != 0) {
             final var parent = baseMapper.selectById(request.parentId());
             if (parent == null) {
@@ -154,46 +149,31 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
             }
         }
 
-        // 4. 子孫ノードチェック（循環防止）
+        // 循環チェック（Service）
         checkParentNotChild(id, request.parentId());
 
-        // 5. type変更チェック
-        if (existing.getType() != request.type()) {
-            final var children = menuRepository.countByParentId(id);
-            if (children > 0) {
-                log.warn("[MenuAppService#updateMenu] cannot change type due to existing children: id={}, childrenCount={}", id, children);
-                throw BizException.withDetail(ErrorCode.BAD_REQUEST, "子メニューが存在するためタイプ変更できません");
-            }
-        }
+        // type変更制御（Domain）
+        final var childrenCount = menuRepository.countByParentId(id);
+        existing.validateTypeChange(oldType, request.type(), childrenCount > 0);
 
-        // 6. type別バリデーション
-        validateByType(request);
+        // 種別ルールチェック（Domain）
+        existing.validateByType();
 
-        // 7. 重複チェック（自分除外）
-        final var count = menuRepository.countByParentIdAndNameExcludeId(
+        // 名称重複チェック（DB→Domain）
+        final var nameCount = menuRepository.countByParentIdAndNameExcludeId(
                 request.parentId(),
                 request.name(),
                 id
         );
-        if (count > 0) {
-            log.warn("[MenuAppService#updateMenu] duplicate name on same level: parentId={}, name={}, id={}",
-                    request.parentId(), request.name(), id);
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "同一階層に同名メニューが存在します");
-        }
+        existing.validateDuplicateName(nameCount > 0);
 
-        // 8. path 重複チェック（任意）
+        // path重複チェック（DB→Domain）
         if (StringUtils.hasText(request.path())) {
             final var pathCount = menuRepository.countByPathExcludeId(request.path(), id);
-            if (pathCount > 0) {
-                log.warn("[MenuAppService#updateMenu] duplicate path: path={}, id={}", request.path(), id);
-                throw BizException.withDetail(ErrorCode.BAD_REQUEST, "path が既に存在します");
-            }
+            existing.validateDuplicatePath(pathCount > 0);
         }
 
-        // 9. entity更新
-        MenuAssembler.applyToExisting(request, existing);
-
-        // 10. 更新
+        // 更新
         baseMapper.updateById(existing);
 
         log.info("[MenuAppService#updateMenu] success: id={}", id);
@@ -203,100 +183,82 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
     @Transactional
     public void deleteMenu(Long id) {
 
+        // 参数チェック
         if (id == null) {
             log.warn("[MenuAppService#deleteMenu] id is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "メニューIDが指定されていません");
         }
 
+        // 存在チェック
         final var existing = baseMapper.selectById(id);
         if (existing == null) {
             log.warn("[MenuAppService#deleteMenu] menu not found id={}", id);
             throw BizException.withDetail(ErrorCode.NOT_FOUND, "メニューが存在しません");
         }
 
-        // 子メニュー存在チェック
-        final var childMenuCount = menuRepository.countByParentId(id);
-        if (childMenuCount > 0) {
-            log.warn("[MenuAppService#deleteMenu] cannot delete menu with existing children: id={}, childCount={}", id, childMenuCount);
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "子メニューが存在するため削除できません");
-        }
+        // 子ノード存在チェック
+        final var childCount = menuRepository.countByParentId(id);
 
-        // 使用中チェック
-        long count = roleMenuMapper.selectCount(
+        final long usedCount = roleMenuMapper.selectCount(
                 Wrappers.<RoleMenu>lambdaQuery()
                         .eq(RoleMenu::getMenuId, id)
         );
-        if (count > 0) {
-            log.warn("[MenuAppService#deleteMenu] menu is used by roles, cannot delete: id={}", id);
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "該当メニューは使用中のため削除できません");
-        }
 
-        //ロールメニュー関連の削除
+        // 削除制御チェック（Domain）
+        existing.validateDeletable(childCount > 0, usedCount > 0);
+
+        // 関連するロール-メニューの紐付け削除
         roleMenuMapper.delete(
                 Wrappers.<RoleMenu>lambdaQuery()
                         .eq(RoleMenu::getMenuId, id)
         );
         log.info("[MenuAppService#deleteMenu] related role-menu associations deleted: menuId={}", id);
 
-        // メニュー項目の削除
+        // メニュー削除
         baseMapper.deleteById(id);
         log.info("[MenuAppService#deleteMenu] menu deleted successfully: id={}", id);
     }
 
     @Override
     @Transactional
-    public void changeStatus(Long id, MenuStatusUpdateRequest request) {
+    public void changeMenuStatus(Long id, MenuStatusUpdateRequest request) {
         log.info("[MenuAppService#changeStatus] start: id={}, status={}", id, request.status());
+
+        //IDの存在チェック
         if (id == null) {
             log.warn("[MenuAppService#changeStatus] id is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "メニューIDが指定されていません");
         }
+        // ステータスの存在チェック
         if (request.status() == null) {
             log.warn("[MenuAppService#changeStatus] status is null");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ステータスが指定されていません");
         }
+        // メニューの存在チェック
         final var menu = baseMapper.selectById(id);
         if (menu == null) {
             log.warn("[MenuAppService#changeStatus] menu not found id={}", id);
             throw BizException.withDetail(ErrorCode.NOT_FOUND, "メニューが存在しません");
         }
+        //以前のステータスを保持（ログ用）※Domainで変更後は取得できないため、ここで取得しておく
         final var oldStatus = menu.getStatus();
-        if (oldStatus == request.status()) {
-            log.info("[MenuAppService#changeStatus] status is the same, no change needed: id={}, status={}", id, request.status());
-            return;
-        }
-        baseMapper.update(
-                null,
-                Wrappers.<Menu>lambdaUpdate()
-                        .set(Menu::getStatus, request.status())
-                        .eq(Menu::getId, id)
+
+        // Domainで状態変更
+        menu.changeStatus(request.status());
+
+        baseMapper.updateById(menu);
+
+        log.info(
+                "[MenuAppService#changeStatus] status changed successfully: id={}, oldStatus={}, newStatus={}",
+                id,
+                oldStatus,
+                request.status()
         );
-        log.info("[MenuAppService#changeStatus] status changed successfully: id={}, oldStatus={}, newStatus={}", id, oldStatus, request.status());
     }
 
-    /**
-     * メニュー種別ごとのバリデーション
-     */
-    private void validateByType(MenuSaveOrUpdateRequest request) {
-        switch (request.type()) {
-            case MENU -> {
-                if (!StringUtils.hasText(request.path()) ||
-                        !StringUtils.hasText(request.component())) {
-                    log.warn("[MenuAppService#validateByType] validation failed: path/component required");
-                    throw BizException.withDetail(ErrorCode.BAD_REQUEST, "メニューのパスとコンポーネントは必須です");
-                }
-            }
-            case BUTTON -> {
-                if (!StringUtils.hasText(request.permission())) {
-                    log.warn("[MenuAppService#validateByType] validation failed: permission required");
-                    throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ボタンは permission が必須です");
-                }
-            }
-            case DIRECTORY -> {
-                // ディレクトリは制限なし（必要なら拡張）
-            }
-        }
-    }
+
+
+
 
     /**
      * 親子関係の循環チェック（子ノードを親に設定することを防止）
@@ -323,8 +285,9 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
 
     /**
      * 再帰的にツリー構造を構築するヘルパーメソッド
+     *
      * @param parentMap parentId をキー、子ノードのリストを値とするマップ
-     * @param parentId 現在の親ID（最初は0からスタート）
+     * @param parentId  現在の親ID（最初は0からスタート）
      * @return 親IDに紐づく子ノードのリスト（子ノードも再帰的に構築済み）
      */
     private List<MenuTreeVo> buildTree(Map<Long, List<MenuTreeVo>> parentMap, Long parentId) {
