@@ -2,8 +2,11 @@ package com.manpowergroup.springboot.springboot3web.system.domain.model.user;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.VerifiedStatus;
+import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("t_sys_user_account")
+@Builder
 public class UserAccount {
 
     /**
@@ -74,11 +78,31 @@ public class UserAccount {
     private Byte isDeleted;
 
 
-    public boolean isEnabled() {
-        return status == Status.ENABLED;
+    public void login(User user) {
+        ensureLoginAllowed(user);
+    }
+    public void ensureLoginAllowed(User user) {
+        validateAccountStatus();
+        validateVerifiedStatus();
+        validatePassword();
+        user.validateUserStatus();
     }
 
-    public boolean isVerified() {
-        return verified == VerifiedStatus.VERIFIED;
+    public void validateAccountStatus() {
+        if (status != null && status == Status.DISABLED) {
+            throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "アカウントは無効化されています。");
+        }
+    }
+
+    public void validateVerifiedStatus() {
+        if (verified != null && verified == VerifiedStatus.UNVERIFIED) {
+            throw BizException.withDetail(ErrorCode.FORBIDDEN, "アカウントは未認証です。");
+        }
+    }
+
+    public void validatePassword() {
+        if (password == null || password.isBlank()) {
+            throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "パスワードが設定されていません。");
+        }
     }
 }

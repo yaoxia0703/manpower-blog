@@ -5,9 +5,13 @@ import com.manpowergroup.springboot.springboot3web.blog.common.dto.LoginUser;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.framework.security.PasswordService;
+import com.manpowergroup.springboot.springboot3web.system.application.assembler.UserAccountAssembler;
+import com.manpowergroup.springboot.springboot3web.system.application.assembler.UserAssembler;
 import com.manpowergroup.springboot.springboot3web.system.application.dto.userAccount.LoginAccountUserDTO;
 import com.manpowergroup.springboot.springboot3web.system.application.service.LoginAppService;
 import com.manpowergroup.springboot.springboot3web.system.application.service.UserAccountAppService;
+import com.manpowergroup.springboot.springboot3web.system.domain.model.user.User;
+import com.manpowergroup.springboot.springboot3web.system.domain.model.user.UserAccount;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,43 +42,32 @@ public class LoginAppServiceImpl implements LoginAppService {
                     );
                 });
 
-        if (dto.getUserStatus() != null && dto.getUserStatus() == 0) {
-            log.warn("Login failed: user is disabled. accountType={}, accountValue={}, userId={}",
-                    accountType, accountValue, dto.getUserId());
-            throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "ユーザーは無効化されています。");
-        }
 
-        if (dto.getAccountStatus() != null && dto.getAccountStatus() == 0) {
-            log.warn("Login failed: account is disabled. accountType={}, accountValue={}, accountId={}",
-                    accountType, accountValue, dto.getAccountId());
-            throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "アカウントは無効化されています。");
-        }
+        //2. dto-->entity 変換
+        //userとuserAccountは別テーブルなので、DTOからそれぞれのEntityに変換する必要がある
+        User user = UserAssembler.toEntity(dto);
+        UserAccount userAccount = UserAccountAssembler.toEntity(dto);
 
-        if (dto.getVerified() != null && dto.getVerified() == 0) {
-            log.warn("Login failed: account not verified. accountType={}, accountValue={}, accountId={}",
-                    accountType, accountValue, dto.getAccountId());
-            throw BizException.withDetail(ErrorCode.FORBIDDEN, "アカウントは未認証です。");
-        }
-
-        // 5) 密码照合（BCrypt）
-        if (dto.getPassword() == null || dto.getPassword().isBlank()
-                || !passwordService.matches(req.getPassword(), dto.getPassword())) {
+        // 3. ユーザー状態・アカウント状態・認証状態のチェック Damain層での状態チェック
+        user.ensureLoginAllowed();
+        userAccount.login(user);
+        // passwordの平文とDBのハッシュ化されたpasswordをBCryptで照合する service側で処理
+        if (!passwordService.matches(req.getPassword(), userAccount.getPassword())) {
             log.warn("Login failed: password mismatch. accountType={}, accountValue={}", accountType, accountValue);
             throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "パスワードが正しくありません。");
         }
-
-        List<String> roleNames = userAccountService.findRoleNamesByUserId(dto.getUserId());
+        // 4. ロール情報の取得
+        List<String> roleNames = userAccountService.findRoleNamesByUserId(user.getId());
 
         return LoginUser.builder()
-                .userId(dto.getUserId())
-                .accountId(dto.getAccountId())
+                .userId(user.getId())
+                .accountId(userAccount.getId())
                 .accountType(req.getAccountType())
                 .accountValue(req.getAccountValue())
                 .roleNames(roleNames)
                 .nickName(dto.getNickName())
                 .build();
     }
-
 
 
 }

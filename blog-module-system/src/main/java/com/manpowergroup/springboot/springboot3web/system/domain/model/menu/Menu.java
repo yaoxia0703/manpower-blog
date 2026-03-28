@@ -160,7 +160,7 @@ public class Menu {
      * @param id 自身のID
      */
     public void validateNotSelfParent(Long id) {
-        if (this.parentId != null && this.parentId.equals(id)) {
+        if (parentId.equals(id)) {
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "自身を親に設定できません");
         }
     }
@@ -201,10 +201,6 @@ public class Menu {
      * @param newStatus 変更後ステータス
      */
     public void changeStatus(Status newStatus) {
-        if (newStatus == null) {
-            throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ステータスが指定されていません");
-        }
-
         if (this.status == newStatus) {
             return;
         }

@@ -1,5 +1,11 @@
 package com.manpowergroup.springboot.springboot3web.system.application.dto.userAccount;
 
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.VerifiedStatus;
+import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
+import com.manpowergroup.springboot.springboot3web.system.domain.model.user.User;
+import com.manpowergroup.springboot.springboot3web.system.domain.model.user.UserAccount;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -27,13 +33,13 @@ public class LoginAccountUserDTO {
     private String accountValue;
 
     @Schema(description = "ユーザーステータス（1=有効、0=無効）")
-    private Integer userStatus;
+    private Status userStatus;
 
     @Schema(description = "アカウントステータス（1=有効、0=無効）")
-    private Integer accountStatus;
+    private Status accountStatus;
 
     @Schema(description = "認証状態（1=認証済み、0=未認証）")
-    private Integer verified;
+    private VerifiedStatus verified;
 
     @Schema(
             description = "暗号化パスワード（ログイン照合専用・APIレスポンスには出力しない）",
@@ -41,15 +47,4 @@ public class LoginAccountUserDTO {
     )
     private String password;
 
-    public boolean isUserEnabled() {
-        return userStatus != null && userStatus == 1;
-    }
-
-    public boolean isAccountEnabled() {
-        return accountStatus != null && accountStatus == 1;
-    }
-
-    public boolean isVerified() {
-        return verified != null && verified == 1;
-    }
 }

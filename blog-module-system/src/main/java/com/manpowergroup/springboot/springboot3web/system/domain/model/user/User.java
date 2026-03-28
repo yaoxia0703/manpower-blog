@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.Status;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.UserErrorCode;
+import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
@@ -19,8 +21,11 @@ import java.time.LocalDateTime;
  * @author YAOXIA
  * @since 2025-12-18
  */
-@Getter
-@Setter
+@Data
+@Builder
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 @TableName("t_sys_user")
 @Schema(description = "システムユーザー")
 public class User {
@@ -64,4 +69,15 @@ public class User {
     @TableLogic
     @TableField(value = "is_deleted")
     private Byte isDeleted;
+
+
+    public void ensureLoginAllowed(){
+        validateUserStatus();
+    }
+
+    public void validateUserStatus() {
+        if (status == Status.DISABLED) {
+            throw BizException.withDetail(UserErrorCode.ACCOUNT_DISABLED, "ユーザーは無効化されています。");
+        }
+    }
 }
