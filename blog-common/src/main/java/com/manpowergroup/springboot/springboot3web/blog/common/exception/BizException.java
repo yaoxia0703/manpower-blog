@@ -1,6 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.blog.common.exception;
 
-import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
+import com.manpowergroup.springboot.springboot3web.blog.common.enums.BaseErrorCode;
 import lombok.Getter;
 
 /**
@@ -12,7 +12,7 @@ import lombok.Getter;
 @Getter
 public class BizException extends RuntimeException {
 
-    private final ErrorCode code;
+    private final BaseErrorCode code;
 
     /** i18n 文言キー（例: "error.not_found" / "article.not_found" / "field.required"） */
     private final String messageKey;
@@ -28,17 +28,17 @@ public class BizException extends RuntimeException {
 
     /* ===================== 既存互換コンストラクタ ===================== */
 
-    /** 旧方式との互換：ErrorCode のみを渡す（enum に定義された key を使用） */
-    public BizException(ErrorCode code) {
-        super(code.message());            // 一時的に key を Throwable#getMessage() に保存
+    /** 旧方式との互換：BaseErrorCode code のみを渡す（enum に定義された key を使用） */
+    public BizException(BaseErrorCode  code) {
+        super(code.messageKey());            // 一時的に key を Throwable#getMessage() に保存
         this.code = code;
-        this.messageKey = code.message();
+        this.messageKey = code.messageKey();
         this.args = null;
         this.detail = null;
     }
 
     /** 推奨：業務用の key とプレースホルダ引数を指定 */
-    public BizException(ErrorCode code, String messageKey, Object... args) {
+    public BizException(BaseErrorCode code, String messageKey, Object... args) {
         super(messageKey);
         this.code = code;
         this.messageKey = messageKey;
@@ -47,15 +47,15 @@ public class BizException extends RuntimeException {
     }
 
     /** 原因例外（チェーン例外）を伴う場合 */
-    public BizException(ErrorCode code, Throwable cause) {
-        super(code.message(), cause);
+    public BizException(BaseErrorCode code, Throwable cause) {
+        super(code.messageKey(), cause);
         this.code = code;
-        this.messageKey = code.message();
+        this.messageKey = code.messageKey();
         this.args = null;
         this.detail = null;
     }
 
-    public BizException(ErrorCode code, String messageKey, Throwable cause, Object... args) {
+    public BizException(BaseErrorCode code, String messageKey, Throwable cause, Object... args) {
         super(messageKey, cause);
         this.code = code;
         this.messageKey = messageKey;
@@ -66,16 +66,16 @@ public class BizException extends RuntimeException {
     /* ===================== detail 追加コンストラクタ ===================== */
 
     /** ErrorCode + detail（i18n key は ErrorCode 既定を使用） */
-    public BizException(ErrorCode code, String detail) {
-        super(code.message());
+    public BizException(BaseErrorCode code, String detail) {
+        super(code.messageKey());
         this.code = code;
-        this.messageKey = code.message();
+        this.messageKey = code.messageKey();
         this.args = null;
         this.detail = detail;
     }
 
     /** ErrorCode + messageKey(+args) + detail */
-    public BizException(ErrorCode code, String messageKey, String detail, Object... args) {
+    public BizException(BaseErrorCode code, String messageKey, String detail, Object... args) {
         super(messageKey);
         this.code = code;
         this.messageKey = messageKey;
@@ -84,15 +84,15 @@ public class BizException extends RuntimeException {
     }
 
     /** ErrorCode + cause + detail（i18n key は ErrorCode 既定を使用） */
-    public BizException(ErrorCode code, Throwable cause, String detail) {
-        super(code.message(), cause);
+    public BizException(BaseErrorCode code, Throwable cause, String detail) {
+        super(code.messageKey(), cause);
         this.code = code;
-        this.messageKey = code.message();
+        this.messageKey = code.messageKey();
         this.args = null;
         this.detail = detail;
     }
 
-    public BizException(ErrorCode code, String messageKey, Throwable cause, String detail, Object... args) {
+    public BizException(BaseErrorCode code, String messageKey, Throwable cause, String detail, Object... args) {
         super(messageKey, cause);
         this.code = code;
         this.messageKey = messageKey;
@@ -102,35 +102,35 @@ public class BizException extends RuntimeException {
 
     /* ===================== 使いやすいファクトリ（任意） ===================== */
 
-    public static BizException of(ErrorCode code) {
+    public static BizException of(BaseErrorCode code) {
         return new BizException(code);
     }
 
-    public static BizException of(ErrorCode code, String messageKey, Object... args) {
+    public static BizException of(BaseErrorCode code, String messageKey, Object... args) {
         return new BizException(code, messageKey, args);
     }
 
-    public static BizException withDetail(ErrorCode code, String detail) {
+    public static BizException withDetail(BaseErrorCode code, String detail) {
         return new BizException(code, detail);
     }
 
-    public static BizException withDetail(ErrorCode code, String messageKey, String detail, Object... args) {
+    public static BizException withDetail(BaseErrorCode code, String messageKey, String detail, Object... args) {
         return new BizException(code, messageKey, detail, args);
     }
 
-    public static BizException withCause(ErrorCode code, Throwable cause) {
+    public static BizException withCause(BaseErrorCode code, Throwable cause) {
         return new BizException(code, cause);
     }
 
-    public static BizException withCause(ErrorCode code, Throwable cause, String messageKey, Object... args) {
+    public static BizException withCause(BaseErrorCode code, Throwable cause, String messageKey, Object... args) {
         return new BizException(code, messageKey, cause, args);
     }
 
-    public static BizException withCauseAndDetail(ErrorCode code, Throwable cause, String detail) {
+    public static BizException withCauseAndDetail(BaseErrorCode code, Throwable cause, String detail) {
         return new BizException(code, cause, detail);
     }
 
-    public static BizException withCauseAndDetail(ErrorCode code, String messageKey, Throwable cause, String detail, Object... args) {
+    public static BizException withCauseAndDetail(BaseErrorCode code, String messageKey, Throwable cause, String detail, Object... args) {
         return new BizException(code, messageKey, cause, detail, args);
     }
 }

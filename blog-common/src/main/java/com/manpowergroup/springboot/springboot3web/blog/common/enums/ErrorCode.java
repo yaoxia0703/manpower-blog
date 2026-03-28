@@ -3,7 +3,7 @@ package com.manpowergroup.springboot.springboot3web.blog.common.enums;
 /**
  * 統一エラーコード（業務コードは 1000+ から拡張可能）
  */
-public enum ErrorCode {
+public enum ErrorCode  implements BaseErrorCode{
     SUCCESS(200, "success.ok"),
     BAD_REQUEST(400, "error.bad_request"),
     UNAUTHORIZED(401, "error.unauthorized"),
@@ -13,6 +13,7 @@ public enum ErrorCode {
     UNSUPPORTED_MEDIA_TYPE(415, "error.unsupported_media_type"),
     TOO_MANY_REQUESTS(429, "error.too_many_requests"),
     VALIDATION_ERROR(422, "error.validation"),
+
 
     // ===== 併走/排他制御（競合）=====
     // 同時実行などにより処理が衝突した場合（例：ロック取得失敗）
