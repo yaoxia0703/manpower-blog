@@ -1,7 +1,6 @@
 package com.manpowergroup.springboot.springboot3web.admin;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.dto.Result;
-import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.system.application.assembler.MenuAssembler;
@@ -21,6 +20,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * <p>
+ * メニュー関連のAPIコントローラー
+ * </p>
+ *
+ * @author YAOXIA
+ * @since 2026-03-01
+ */
 @Slf4j
 @Validated
 @RestController

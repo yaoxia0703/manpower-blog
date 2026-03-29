@@ -13,6 +13,14 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * <p>
+ * ロール関連のAPIコントローラー
+ * </p>
+ *
+ * @author YAOXIA
+ * @since 2026-03-01
+ */
 @RestController
 @RequestMapping("/api/system/role")
 @AllArgsConstructor

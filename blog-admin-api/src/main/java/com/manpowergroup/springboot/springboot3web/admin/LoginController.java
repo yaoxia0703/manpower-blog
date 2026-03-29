@@ -19,6 +19,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * <p>
+ * ログイン関連のAPIコントローラー
+ * </p>
+ *
+ * @author YAOXIA
+ * @since 2026-03-01
+ */
 @RestController
 @RequestMapping("/api/system/auth")
 @AllArgsConstructor
@@ -29,6 +37,13 @@ public class LoginController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserAppService userService;
 
+    /**
+     * ログイン処理
+     *
+     * @param loginRequest ログインリクエスト
+     * @param response HTTPレスポンス（JWTトークンをヘッダーに設定するため）
+     * @return ログインユーザー情報とアクセストークンを含むレスポンス
+     */
     @PostMapping("/login")
     public Result<LoginResponse<LoginUser>> login(
             @Valid @RequestBody LoginRequest loginRequest,
