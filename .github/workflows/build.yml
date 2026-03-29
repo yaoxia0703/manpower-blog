@@ -3,13 +3,13 @@ name: Build Check
 on:
   push:
     branches:
-      - master
+      - main
 #    paths:
 #      - '**.java'
 #      - 'pom.xml'
   pull_request:
     branches:
-      - master
+      - main
 #    paths:
 #      - '**.java'
 #      - 'pom.xml'
