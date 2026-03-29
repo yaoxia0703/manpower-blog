@@ -12,12 +12,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 /**
  * セキュリティ設定クラス
  */
 @Configuration
-@EnableMethodSecurity // メソッドレベルのセキュリティを有効化（@PreAuthorize などが使えるようになる）
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -33,9 +38,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                // CSRF無効化
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // CORS設定適用
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // セッションを使用しない（JWT前提）
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // 認証・認可エラーハンドリング
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -49,28 +61,54 @@ public class SecurityConfig {
                         })
                 )
 
+                // アクセス制御
                 .authorizeHttpRequests(auth -> auth
-                        // ★差分: auth配下を全部permitAllにしない（/me を認証必須にするため）
-                        .requestMatchers("/api/system/auth/login").permitAll()
-                        // 必要なら refresh / logout をここに追加
-                        // .requestMatchers("/api/system/auth/refresh").permitAll()
+                        // 認証不要（ログイン系）
+                        .requestMatchers("/api/system/auth/**").permitAll()
 
+                        // 基本リソース
                         .requestMatchers("/error/**", "/favicon.ico").permitAll()
 
-                        // ★差分: /api/system/auth/** は認証必須（/me を含む）
-                        .requestMatchers("/api/system/auth/**").authenticated()
+                        // 認証必須API
                         .requestMatchers("/api/system/**").authenticated()
 
+                        // その他は許可
                         .anyRequest().permitAll()
                 )
 
+                // JWTフィルタ適用
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     /**
-     * パスワードエンコーダー（BCrypt）
+     * CORS設定
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // フロントエンド許可オリジン
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+
+        // 許可HTTPメソッド
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // 許可ヘッダー
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // Cookie / Authorization許可
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
+    /**
+     * パスワードエンコーダー
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
