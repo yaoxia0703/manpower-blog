@@ -38,7 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return false;
         }
 
-        return path.startsWith("/api/system/auth/")
+        return path.startsWith("/api/system/auth/login")
+                || path.startsWith("/api/system/auth/logout")
                 || path.startsWith("/error/")
                 || path.equals("/favicon.ico");
 
@@ -69,7 +70,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final Long userId = jwtTokenProvider.getUserId(token);
+        final Long accountId = jwtTokenProvider.getAccountId(token);
         if (userId == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if (accountId == null) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -84,7 +90,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
-        final var principal = new LoginPrincipal(userId);
+        final var principal = new LoginPrincipal(userId,accountId);
 
         final UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, authorities);

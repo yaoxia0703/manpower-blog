@@ -51,6 +51,7 @@ public class JwtTokenProvider {
                 .setExpiration(Date.from(exp))
                 .claim("roles", String.join(",", CollectionUtils.safeList(user.getRoleNames())))
                 .claim("nickName", StringUtils.nullToEmpty(user.getNickName()))
+                .claim("accountId", user.getAccountId())
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -89,6 +90,16 @@ public class JwtTokenProvider {
         }
         return Long.valueOf(sub);
     }
+
+
+    /**
+     * 从 token 获取 accountId
+     */
+    public Long getAccountId(String token) {
+        Object accountId = parseClaims(token).get("accountId");
+        return Long.valueOf(accountId.toString());
+    }
+
 
     /**
      * 从 token 获取 roles（逗号分隔字符串）
