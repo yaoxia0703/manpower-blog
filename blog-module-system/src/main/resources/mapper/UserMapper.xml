@@ -32,19 +32,20 @@
 
     </resultMap>
 
-    <select id="selectLoginUserDetailByUserId"
+
+
+    <select id="getCurrentUserContext"
             resultMap="LoginUserResultMap">
 
-        SELECT
-            u.id             AS userId,
-            ua.id            AS accountId,
-            u.nick_name      AS nickName,
-            ua.account_type  AS accountType,
-            ua.account_value AS accountValue,
-            r.name           AS roleName
+        SELECT u.id             AS userId,
+               ua.id            AS accountId,
+               u.nick_name      AS nickName,
+               ua.account_type  AS accountType,
+               ua.account_value AS accountValue,
+               r.name           AS roleName
         FROM t_sys_user u
                  LEFT JOIN t_sys_user_account ua
-                           ON u.id = ua.user_id
+                           ON ua.id = #{accountId}
                                AND ua.is_deleted = 0
                  LEFT JOIN t_sys_user_role ur
                            ON u.id = ur.user_id

@@ -2,13 +2,17 @@ package com.manpowergroup.springboot.springboot3web.blog.common.dto;
 
 import com.manpowergroup.springboot.springboot3web.blog.common.enums.AccountType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "ログイン成功レスポンス（ユーザー情報）")
 public class LoginUser  {
 
@@ -30,6 +34,8 @@ public class LoginUser  {
     @Schema(description = "ロール一覧")
     private List<String> roleNames;
 
+    @Schema(description = "権限一覧")
+    private List<String> permissions;
 
 
 

@@ -10,7 +10,9 @@ import com.manpowergroup.springboot.springboot3web.framework.security.jwt.JwtTok
 import com.manpowergroup.springboot.springboot3web.framework.security.jwt.LoginPrincipal;
 import com.manpowergroup.springboot.springboot3web.system.application.service.LoginAppService;
 import com.manpowergroup.springboot.springboot3web.system.application.service.UserAppService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +43,7 @@ public class LoginController {
      * ログイン処理
      *
      * @param loginRequest ログインリクエスト
-     * @param response HTTPレスポンス（JWTトークンをヘッダーに設定するため）
+     * @param response     HTTPレスポンス（JWTトークンをヘッダーに設定するため）
      * @return ログインユーザー情報とアクセストークンを含むレスポンス
      */
     @PostMapping("/login")
@@ -64,11 +66,33 @@ public class LoginController {
     }
 
 
+    /**
+     * ログアウト処理
+     *
+     * @param request HTTPリクエスト（セッションを無効化するため）
+     * @return ログアウト成功のレスポンス
+     */
     @PostMapping("/logout")
-    public Result<Void> logout() {
-        return Result.ok(null);
+    public Result<Void> logout(HttpServletRequest request) {
+        // JWTトークンはクライアント側で管理されるため、サーバー側でのトークン無効化は行わない。
+        // ただし、セッションが存在する場合は無効化する。
+        HttpSession session = request.getSession(false);
+        // セッションが存在する場合は無効化する（JWTトークンはクライアント側で管理されるため、サーバー側でのトークン無効化は行わない）
+        if (session != null) {
+            // セッションを無効化する
+            session.invalidate();
+        }
+        // セキュリティコンテキストをクリアする
+        SecurityContextHolder.clearContext();
+        return Result.ok();
     }
 
+
+    /**
+     * ログインユーザー情報の取得
+     *
+     * @return ログインユーザー情報
+     */
     @GetMapping("/me")
     public Result<LoginUser> me() {
 
@@ -80,24 +104,25 @@ public class LoginController {
         final Object principal = auth.getPrincipal();
 
         final Long userId;
+        final Long accountId;
         if (principal instanceof LoginPrincipal p) {
             userId = p.userId();
+            accountId = p.accountId();
         } else if (principal instanceof Long id) {
             // 互換用（旧実装が principal=Long の場合）
             userId = id;
+            accountId = null;
         } else {
             throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "ユーザーはログインしていません。");
         }
 
-        final LoginUser loginUser = userService.findLoginUserDetailByUserId(userId);
+        final LoginUser loginUser = userService.getCurrentUserContext(userId,accountId);
         if (loginUser == null) {
             throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "ユーザーはログインしていません。");
         }
 
         return Result.ok(loginUser);
     }
-
-
 
 
 }

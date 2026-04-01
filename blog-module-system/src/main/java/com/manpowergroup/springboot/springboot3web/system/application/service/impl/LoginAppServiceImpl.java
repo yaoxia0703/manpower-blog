@@ -59,6 +59,8 @@ public class LoginAppServiceImpl implements LoginAppService {
         // 4. ロール情報の取得
         List<String> roleNames = userAccountService.findRoleNamesByUserId(user.getId());
 
+        //premission 情報も必要な場合は、userAccountService.findPermissionsByUserId(user.getId())などのメソッドを呼び出して取得する
+
         return LoginUser.builder()
                 .userId(user.getId())
                 .accountId(userAccount.getId())

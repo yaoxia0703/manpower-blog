@@ -22,7 +22,7 @@ public interface UserMapper extends BaseMapper<User> {
      * @param userId ユーザーID
      * @return ログインユーザー詳細情報
      */
-    LoginUser selectLoginUserDetailByUserId(@Param("userId") Long userId);
+    LoginUser getCurrentUserContext(@Param("userId") Long userId,@Param("accountId") Long accountId);
 
 
 
