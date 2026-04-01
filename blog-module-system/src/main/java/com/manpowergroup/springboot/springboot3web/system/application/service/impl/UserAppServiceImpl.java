@@ -25,8 +25,8 @@ public class UserAppServiceImpl extends ServiceImpl<UserMapper, User> implements
     }
 
     @Override
-    public LoginUser findLoginUserDetailByUserId(Long userId) {
-        return userMapper.selectLoginUserDetailByUserId(userId);
+    public LoginUser getCurrentUserContext(Long userId,Long accountId) {
+        return userMapper.getCurrentUserContext(userId,accountId);
     }
 
 

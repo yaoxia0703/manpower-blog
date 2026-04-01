@@ -19,5 +19,5 @@ public interface UserAppService extends IService<User> {
      * @param userId ユーザーID
      * @return ログインユーザー詳細情報
      */
-    LoginUser findLoginUserDetailByUserId(Long userId);
+    LoginUser getCurrentUserContext(Long userId,Long accountId);
 }
