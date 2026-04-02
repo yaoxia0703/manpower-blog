@@ -8,8 +8,12 @@ import com.manpowergroup.springboot.springboot3web.blog.common.enums.ErrorCode;
 import com.manpowergroup.springboot.springboot3web.blog.common.exception.BizException;
 import com.manpowergroup.springboot.springboot3web.framework.security.jwt.JwtTokenProvider;
 import com.manpowergroup.springboot.springboot3web.framework.security.jwt.LoginPrincipal;
+import com.manpowergroup.springboot.springboot3web.system.application.dto.me.MeResponse;
 import com.manpowergroup.springboot.springboot3web.system.application.service.LoginAppService;
+import com.manpowergroup.springboot.springboot3web.system.application.service.MenuAppService;
+import com.manpowergroup.springboot.springboot3web.system.application.service.PermissionAppService;
 import com.manpowergroup.springboot.springboot3web.system.application.service.UserAppService;
+import com.manpowergroup.springboot.springboot3web.system.application.vo.MenuTreeVo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -20,6 +24,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -37,7 +43,9 @@ public class LoginController {
 
     private final LoginAppService loginService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserAppService userService;
+    private final UserAppService userAppService;
+    private final MenuAppService menuAppService;
+    private final PermissionAppService permissionAppService;
 
     /**
      * ログイン処理
@@ -94,34 +102,42 @@ public class LoginController {
      * @return ログインユーザー情報
      */
     @GetMapping("/me")
-    public Result<LoginUser> me() {
+    public Result<MeResponse> me() {
 
         final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getPrincipal() == null) {
+
+        if (auth == null || !auth.isAuthenticated()) {
             throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "ユーザーはログインしていません。");
         }
 
-        final Object principal = auth.getPrincipal();
-
-        final Long userId;
-        final Long accountId;
-        if (principal instanceof LoginPrincipal p) {
-            userId = p.userId();
-            accountId = p.accountId();
-        } else if (principal instanceof Long id) {
-            // 互換用（旧実装が principal=Long の場合）
-            userId = id;
-            accountId = null;
-        } else {
+        if (!(auth.getPrincipal() instanceof LoginPrincipal p)) {
             throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "ユーザーはログインしていません。");
         }
 
-        final LoginUser loginUser = userService.getCurrentUserContext(userId,accountId);
+        final Long userId = p.userId();
+        final Long accountId = p.accountId();
+
+        // 1. 用户信息
+        final LoginUser loginUser = userAppService.getCurrentUserContext(userId, accountId);
+
         if (loginUser == null) {
             throw BizException.withDetail(ErrorCode.UNAUTHORIZED, "ユーザーはログインしていません。");
         }
 
-        return Result.ok(loginUser);
+        // 2. menu
+        final List<MenuTreeVo> menus = menuAppService.selectMenusByUserId(userId);
+
+        // 3. permission
+        final List<String> permissions = permissionAppService.selectPermissionCodesByUserId(userId);
+
+        // 4. 组装返回
+        final MeResponse response = MeResponse.builder()
+                .user(loginUser)
+                .menus(menus)
+                .permissions(permissions)
+                .build();
+
+        return Result.ok(response);
     }
 
 
