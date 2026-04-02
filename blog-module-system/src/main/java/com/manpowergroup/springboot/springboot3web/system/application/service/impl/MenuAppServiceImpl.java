@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
     @Override
     public List<MenuTreeVo> selectAllMenus() {
 
-        // 1. 全件取得（有効なものだけ、表示順でソート）
+        // 1. 全件取得
         List<Menu> menus = baseMapper.selectList(
                 Wrappers.<Menu>lambdaQuery()
                         .eq(Menu::getStatus, Status.ENABLED)
@@ -58,26 +59,26 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
             return List.of();
         }
 
-        //2. Entity -> Vo 変換
+        // 2. Entity → VO
         List<MenuTreeVo> voList = menus.stream()
                 .map(MenuAssembler::toTreeVo)
                 .toList();
 
-        // 3. parentId でグルーピング
-        Map<Long, List<MenuTreeVo>> parentMap = voList.stream()
-                .collect(Collectors.groupingBy(MenuTreeVo::getParentId));
-
-        // 4. 再帰的にツリー構造を構築して返却
-        return buildTree(parentMap, 0L);
+        // 3. 统一走 tree builder ⭐
+        return buildMenuTree(voList);
     }
 
     @Override
     public List<MenuTreeVo> selectMenusByUserId(Long userId) {
+
         if (userId == null) {
-            log.warn("[MenuAppService#selectMenusByUserId] userId is null");
+            log.warn("[MenuAppService#selectMenusByUserId] userId is null, request rejected");
             throw BizException.withDetail(ErrorCode.BAD_REQUEST, "ユーザーIDが指定されていません");
         }
-        return menuRepository.selectMenusByUserId(userId);
+
+        List<MenuTreeVo> list = menuRepository.selectMenusByUserId(userId);
+
+        return buildMenuTree(list);
     }
 
     @Override
@@ -257,9 +258,6 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
     }
 
 
-
-
-
     /**
      * 親子関係の循環チェック（子ノードを親に設定することを防止）
      */
@@ -283,6 +281,25 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
         }
     }
 
+
+    /**
+     * フラットなメニューリストからツリー構造を構築するヘルパーメソッド
+     *
+     * @param list フラットなメニューリスト（parentIdで親子関係が定義されている）
+     * @return ツリー構造のメニューリスト
+     */
+    private List<MenuTreeVo> buildMenuTree(List<MenuTreeVo> list) {
+
+        if (list.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<Long, List<MenuTreeVo>> parentMap = list.stream()
+                .collect(Collectors.groupingBy(MenuTreeVo::getParentId));
+
+        return buildTree(parentMap, 0L);
+    }
+
     /**
      * 再帰的にツリー構造を構築するヘルパーメソッド
      *
@@ -295,12 +312,11 @@ public class MenuAppServiceImpl extends ServiceImpl<MenuMapper, Menu> implements
         List<MenuTreeVo> children = parentMap.get(parentId);
 
         if (children == null) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         for (MenuTreeVo node : children) {
-            List<MenuTreeVo> subChildren = buildTree(parentMap, node.getId());
-            node.setChildren(subChildren);
+            node.setChildren(buildTree(parentMap, node.getId()));
         }
 
         return children;

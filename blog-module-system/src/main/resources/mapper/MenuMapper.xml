@@ -30,16 +30,14 @@
         FROM t_sys_menu tsm
         WHERE tsm.status = 1
           AND tsm.is_deleted = 0
-          AND EXISTS (
-            SELECT 1
+          AND tsm.type IN (1,2)
+          AND tsm.id IN (
+            SELECT tsr.menu_id
             FROM t_sys_role_menu tsr
                      JOIN t_sys_user_role tsur
                           ON tsur.role_id = tsr.role_id
-            WHERE tsr.menu_id = tsm.id
-              AND tsur.user_id = #{userId}
+            WHERE tsur.user_id = #{userId}
               AND tsur.is_deleted = 0
-              AND tsr.is_deleted = 0
-              AND tsm.type IN (1,2)
         )
         ORDER BY tsm.sort ASC, tsm.id ASC
 
