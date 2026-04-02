@@ -39,6 +39,9 @@ public class MenuTreeVo {
     @Schema(description = "状態（0=無効、1=有効）", example = "1")
     private Status status;
 
+    @Schema(description = "权限标识符")
+    private String permission;
+
     @Schema(description = "子メニュー")
     private List<MenuTreeVo> children = new ArrayList<>();
 
